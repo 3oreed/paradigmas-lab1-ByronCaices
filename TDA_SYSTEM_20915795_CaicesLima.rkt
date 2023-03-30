@@ -1,5 +1,9 @@
 #lang racket
+
+(require "TDA_DRIVE_20915795_CaicesLima.rkt")
 (require racket/date)
+
+
 
 (define make-system (lambda
                         (system-name
@@ -10,7 +14,7 @@
                          system-date)
                         (list system-name
                               loged-user
-                              (string-downcase current-path)
+                              current-path ;string-downcase
                               users
                               drives
                               system-date)))
@@ -108,13 +112,14 @@
                                        drives
                                        (get-system-date system-arg))))
 
-(define loged-user? (lambda (system)
-                      (if (null? get-loged-user)
+(define loged-user? (lambda (system-arg)
+                      (if (null? (get-loged-user system-arg))
                           #f
                           #t)))
 
-(define S0 (system "System Tester"))
+
+(define s0 (system "System Tester"))
 
 (define run (lambda (system cmd) (cmd system)))
 
-
+(define drive1 (drive #\C "SO" 1000))
