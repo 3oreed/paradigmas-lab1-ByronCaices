@@ -3,6 +3,9 @@
 (require "TDA_DRIVE_20915795_CaicesLima.rkt")
 (require racket/date)
 
+; copy debe verificar que el archivo se encuentre en la ruta actual del
+; system, si no, no puede ejecutar la funcion
+
 (define (crnt-date)
           (define fecha (current-date))
                           (string-append
@@ -22,12 +25,14 @@
                         (system-name
                          loged-user
                          current-path
+                         current-drive
                          users
                          drives
                          system-date)
                         (list system-name
                               loged-user
                               current-path ;string-downcase
+                              current-drive
                               users
                               drives
                               system-date)))
@@ -36,23 +41,13 @@
                  (make-system name
                               null ;user
                               "" ;path
+                              null ;drive
                               null ;users
                               null ;drives
                               (crnt-date)) ;fecha
                  ))
 
-(define (crnt-date2)
-          (define fecha (current-date))
-                          (string-append
-                             (number->string (date-day fecha))
-                             "/"
-                             (number->string (date-month fecha))
-                             "/"
-                             (number->string (date-year fecha))))
-
-
-
-
+; SELECTORES
 
 (define get-system-name (lambda (system)
                           (car system)))
@@ -63,8 +58,11 @@
 (define get-path (lambda (system)
                           (caddr system)))
 
+(define get-current-drive (lambda (system)
+                            (cadddr)))
+
 (define get-users (lambda (system)
-                          (cadddr system)))
+                          (caddr(reverse system))))
 
 (define get-drives (lambda (system)
                           (cadr(reverse system))))
@@ -72,10 +70,13 @@
 (define get-system-date (lambda (system)
                           (car(reverse system))))
 
+; MODIFICADORES
+
 (define set-system-name (lambda (system-arg name)
                           (make-system name
                                        (get-loged-user system-arg)
                                        (get-path system-arg)
+                                       (get-current-drive system-arg)
                                        (get-users system-arg)
                                        (get-drives system-arg)
                                        (get-system-date system-arg))))
@@ -84,6 +85,7 @@
                           (make-system (get-system-name system-arg)
                                        user
                                        (get-path system-arg)
+                                       (get-current-drive system-arg)
                                        (get-users system-arg)
                                        (get-drives system-arg)
                                        (get-system-date system-arg))))
@@ -92,6 +94,16 @@
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        path
+                                       (get-current-drive system-arg)
+                                       (get-users system-arg)
+                                       (get-drives system-arg)
+                                       (get-system-date system-arg))))
+
+(define set-current-drive (lambda (system-arg drive)
+                          (make-system (get-system-name system-arg)
+                                       (get-loged-user system-arg)
+                                       (get-path system-arg)
+                                       drive
                                        (get-users system-arg)
                                        (get-drives system-arg)
                                        (get-system-date system-arg))))
@@ -100,6 +112,7 @@
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        (get-path system-arg)
+                                       (get-current-drive system-arg)
                                        users
                                        (get-drives system-arg)
                                        (get-system-date system-arg))))
@@ -110,18 +123,58 @@
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        (get-path system-arg)
+                                       (get-current-drive system-arg)
                                        (get-users system-arg)
                                        drives
                                        (get-system-date system-arg))))
+
 
 (define loged-user? (lambda (system-arg)
                       (if (null? (get-loged-user system-arg))
                           #f
                           #t)))
 
+#|
+(define rebuild-system (lambda (system-arg
+                                system-name
+                                loged-user
+                                current-path
+                                current-drive
+                                users
+                                drives
+                                system-date)
+                         (set-(set-drives(set-users(set-current-drive(set-path(set-loged-user(set-system-name system system-name)loged-user)current-path)current-drive)users)drives)system-date)
+                            
+                         
+|#
 
-(define s0 (system "System Tester"))
+
+; REQUERIMIENTOS FUNCIONALES LAB 1
 
 (define run (lambda (system cmd) (cmd system)))
 
-(define drive1 (drive #\C "SO" 1000))
+
+(define add-drive (lambda (system-arg)
+                    (lambda (letter drive-name cap)
+                      (if (not(member letter (map car (get-drives system-arg))))
+                          (make-system (get-system-name system-arg)
+                                       (get-loged-user system-arg)
+                                       
+                                       (string-append ()
+                                        
+                                       (get-current-drive system-arg)
+                                       (get-users system-arg)
+                                       (cons
+                                        (drive letter drive-name cap)
+                                        (get-drives system-arg))
+                                       (get-system-date system-arg)))))
+                          
+
+; EJEMPLOS
+
+(define S0 (system "System Tester"))
+;(define S1 ((run S0 add-drive) #\C "SO" 1000))
+;(define S2 ((run S1 add-drive) #\C "SO1" 3000))
+;(define S3 ((run S2 add-drive) #\D "Util" 2000))
+
+
