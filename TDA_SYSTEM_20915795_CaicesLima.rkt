@@ -3,6 +3,19 @@
 (require "TDA_DRIVE_20915795_CaicesLima.rkt")
 (require racket/date)
 
+(define (crnt-date)
+          (define fecha (current-date))
+                          (string-append
+                             (number->string (date-hour fecha))
+                             ":"
+                             (number->string (date-minute fecha))
+                             " - "
+                             (number->string (date-day fecha))
+                             "/"
+                             (number->string (date-month fecha))
+                             "/"
+                             (number->string (date-year fecha))))
+
 
 
 (define make-system (lambda
@@ -22,7 +35,7 @@
 (define system (lambda (name)
                  (make-system name
                               null ;user
-                              null ;path
+                              "" ;path
                               null ;users
                               null ;drives
                               (crnt-date)) ;fecha
@@ -38,18 +51,7 @@
                              (number->string (date-year fecha))))
 
 
-(define (crnt-date)
-          (define fecha (current-date))
-                          (string-append
-                             (number->string (date-hour fecha))
-                             ":"
-                             (number->string (date-minute fecha))
-                             " - "
-                             (number->string (date-day fecha))
-                             "/"
-                             (number->string (date-month fecha))
-                             "/"
-                             (number->string (date-year fecha))))
+
 
 
 (define get-system-name (lambda (system)
