@@ -22,20 +22,22 @@
 
 
 (define make-system (lambda
-                        (system-name
-                         loged-user
-                         current-path
-                         current-drive
-                         users
-                         drives
-                         system-date)
+                        (system-name ;0
+                         loged-user ;1
+                         current-path ;2
+                         current-drive ;3
+                         users ;4
+                         drives ;5
+                         system-date ;6
+                         trashcan);7
                         (list system-name
                               loged-user
                               current-path ;string-downcase
                               current-drive
                               users
                               drives
-                              system-date)))
+                              system-date
+                              trashcan)))
 
 (define system (lambda (name)
                  (make-system name
@@ -44,7 +46,8 @@
                               null ;drive
                               null ;users
                               null ;drives
-                              (crnt-date)) ;fecha
+                              (crnt-date) ;fecha
+                              null) ;papelera
                  ))
 
 ; SELECTORES
@@ -62,13 +65,16 @@
                             (cadddr system)))
 
 (define get-users (lambda (system)
-                          (caddr(reverse system))))
+                          (list-ref system 4)))
 
 (define get-drives (lambda (system)
-                          (cadr(reverse system))))
+                          (list-ref system 5)))
 
 (define get-system-date (lambda (system)
-                          (car(reverse system))))
+                          (list-ref system 6)))
+
+(define get-trashcan (lambda (system)
+                          (list-ref system 7)))
 
 ; MODIFICADORES
 
@@ -79,7 +85,8 @@
                                        (get-current-drive system-arg)
                                        (get-users system-arg)
                                        (get-drives system-arg)
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 (define set-loged-user (lambda (system-arg user)
                           (make-system (get-system-name system-arg)
@@ -88,7 +95,8 @@
                                        (get-current-drive system-arg)
                                        (get-users system-arg)
                                        (get-drives system-arg)
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 (define set-path (lambda (system-arg path)
                           (make-system (get-system-name system-arg)
@@ -97,7 +105,8 @@
                                        (get-current-drive system-arg)
                                        (get-users system-arg)
                                        (get-drives system-arg)
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 (define set-current-drive (lambda (system-arg drive)
                           (make-system (get-system-name system-arg)
@@ -106,7 +115,8 @@
                                        drive
                                        (get-users system-arg)
                                        (get-drives system-arg)
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 (define set-users (lambda (system-arg users)
                           (make-system (get-system-name system-arg)
@@ -115,7 +125,8 @@
                                        (get-current-drive system-arg)
                                        users
                                        (get-drives system-arg)
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 
 
@@ -126,7 +137,8 @@
                                        (get-current-drive system-arg)
                                        (get-users system-arg)
                                        drives
-                                       (get-system-date system-arg))))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))))
 
 
 (define loged-user? (lambda (system-arg)
@@ -168,7 +180,8 @@
                                        (cons
                                         (drive letter drive-name cap)
                                         (get-drives system-arg))
-                                       (get-system-date system-arg))
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))
                           system-arg))))
                           
 #|
