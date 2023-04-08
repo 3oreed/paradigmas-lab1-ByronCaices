@@ -59,7 +59,7 @@
                           (caddr system)))
 
 (define get-current-drive (lambda (system)
-                            (cadddr)))
+                            (cadddr system)))
 
 (define get-users (lambda (system)
                           (caddr(reverse system))))
@@ -160,21 +160,29 @@
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        
-                                       (string-append ()
+                                       (string-append (string letter) ":/")
                                         
                                        (get-current-drive system-arg)
+                                           
                                        (get-users system-arg)
                                        (cons
                                         (drive letter drive-name cap)
                                         (get-drives system-arg))
-                                       (get-system-date system-arg)))))
+                                       (get-system-date system-arg))
+                          system-arg))))
                           
+#|
+(define register (lambda (system-arg)
+                   (lambda (user-name)
+                     ()
+|#
 
 ; EJEMPLOS
 
 (define S0 (system "System Tester"))
-;(define S1 ((run S0 add-drive) #\C "SO" 1000))
-;(define S2 ((run S1 add-drive) #\C "SO1" 3000))
-;(define S3 ((run S2 add-drive) #\D "Util" 2000))
+(define S1 ((run S0 add-drive) #\C "SO" 1000))
+(define S2 ((run S1 add-drive) #\C "SO1" 3000))
+(define S3 ((run S2 add-drive) #\D "Util" 2000))
+
 
 
