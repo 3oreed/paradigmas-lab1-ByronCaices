@@ -2,7 +2,12 @@
 
 (provide (all-defined-out))
 
+#|
+(define lista-strings '("manzana" "banana" "pera" "uva"))
+(define lista-ordenada (sort lista-strings string<?))
+(displayln lista-ordenada)
 
+|#
                       
 
 (define make-drive (lambda (letter name cap contenido)

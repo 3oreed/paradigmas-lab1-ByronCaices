@@ -1,6 +1,7 @@
 #lang racket
 
 (require "TDA_DRIVE_20915795_CaicesLima.rkt")
+(require "TDA_USER_20915795_CaicesLima.rkt")
 (require racket/date)
 
 ; copy debe verificar que el archivo se encuentre en la ruta actual del
@@ -168,7 +169,7 @@
 
 (define add-drive (lambda (system-arg)
                     (lambda (letter drive-name cap)
-                      (if (not(member letter (map car (get-drives system-arg))))
+                      (if (not(member letter (map get-letter (get-drives system-arg))))
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        
