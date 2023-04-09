@@ -42,7 +42,7 @@
 
 (define system (lambda (name)
                  (make-system name
-                              null ;user
+                              "" ;user
                               "" ;path
                               null ;drive
                               null ;users
@@ -141,11 +141,22 @@
                                        (get-system-date system-arg)
                                        (get-trashcan system-arg))))
 
+(define my-string-null? (lambda (str)
+                          (equal? str "")))
+
 
 (define loged-user? (lambda (system-arg)
-                      (if (null? (get-loged-user system-arg))
-                          #f
-                          #t)))
+                      (if (my-string-null? (get-loged-user system-arg))
+                          #t
+                          #f)))
+
+(define existing-drive? (lambda (system-arg letter)
+                          (if (not(member letter (map get-letter (get-drives system-arg))))
+                              #t
+                              #f)))
+; Funcion que busca un drive en una lista de drives y lo retorna
+(define search-drive)
+;(define registered? (lambda (system-arg))
 
 #|
 (define rebuild-system (lambda (system-arg
@@ -169,13 +180,15 @@
 
 (define add-drive (lambda (system-arg)
                     (lambda (letter drive-name cap)
-                      (if (not(member letter (map get-letter (get-drives system-arg))))
+                      (if (existing-drive? system-arg letter)
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        
                                        (string-append (string letter) ":/")
                                         
-                                       (get-current-drive system-arg)
+                                       ;(get-current-drive system-arg)
+                                       (drive letter drive-name cap)
+                                      
                                            
                                        (get-users system-arg)
                                        (cons
@@ -185,18 +198,91 @@
                                        (get-trashcan system-arg))
                           system-arg))))
                           
-#|
+
 (define register (lambda (system-arg)
                    (lambda (user-name)
-                     ()
-|#
+                     (if (not (member user-name (get-users system-arg)))
+                         (make-system (get-system-name system-arg)
+                                      (get-loged-user system-arg)
+                                      (get-path system-arg)                            
+                                      (get-current-drive system-arg)
+                                      (cons (user user-name)
+                                            (get-users system-arg))
+                                      (get-drives system-arg)
+                                      (get-system-date system-arg)
+                                      (get-trashcan system-arg))
+                          system-arg))))
+                         
+(define login (lambda (system-arg)
+                (lambda (user-name)
+                  (if (or
+                       (not(loged-user? system-arg))
+                       (not(member user-name (get-users system-arg))))
+                         system-arg
+                         (make-system (get-system-name system-arg)
+                                      user-name
+                                      (get-path system-arg)                            
+                                      (get-current-drive system-arg)
+                                      (get-users system-arg)
+                                      (get-drives system-arg)
+                                      (get-system-date system-arg)
+                                      (get-trashcan system-arg))))))
 
+(define logout (lambda (system-arg)
+                 (make-system (get-system-name system-arg)
+                                      ""
+                                      (if (not(null?(get-current-drive system-arg)))
+                                                     (string-append
+                                                         (string (get-letter (get-current-drive system-arg)))
+                                                         ":/")
+                                                     "")
+                                      (get-current-drive system-arg)
+                                      ;(car (get-drives system-arg))
+                                      (get-users system-arg)
+                                      (get-drives system-arg)
+                                      (get-system-date system-arg)
+                                      (get-trashcan system-arg))))
+                  
+
+
+(define switch-drive (lambda (system-arg)
+                    (lambda (letter)
+                      (if (and
+                           (existing-drive? system-arg letter)
+                           (loged-user? system-arg))
+                          (make-system (get-system-name system-arg)
+                                       (get-loged-user system-arg)
+                                       
+                                       (string-append (string letter) ":/")
+                                        
+                                       (get-current-drive system-arg)
+                                           
+                                       (get-users system-arg)
+                                       
+                                       (get-drives system-arg)
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))
+                          system-arg))))
+
+
+            
 ; EJEMPLOS
 
 (define S0 (system "System Tester"))
 (define S1 ((run S0 add-drive) #\C "SO" 1000))
 (define S2 ((run S1 add-drive) #\C "SO1" 3000))
 (define S3 ((run S2 add-drive) #\D "Util" 2000))
+
+(define S4 ((run S3 register) "user1"))
+(define S5 ((run S4 register) "user1"))
+(define S6 ((run S5 register) "user2"))
+
+(define S7 ((run S6 login) "user1"))
+(define S8 ((run S7 login) "user2"))
+;(define S99 ((run S7 login) "user3"))
+(define S9 (run S8 logout))
+(define S10 ((run S9 login) "user2"))
+
 
 
 
