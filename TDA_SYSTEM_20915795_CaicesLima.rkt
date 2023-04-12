@@ -154,6 +154,11 @@
                           (if (not(member letter (map get-letter (get-drives system-arg))))
                               #t
                               #f)))
+
+(define existing-drive2? (lambda (system-arg letter)
+                          (if (not(member letter (map get-letter (get-drives system-arg))))
+                              #t
+                              #f)))
 ; Funcion que busca un drive en una lista de drives y lo retorna
 (define search-drive)
 ;(define registered? (lambda (system-arg))
