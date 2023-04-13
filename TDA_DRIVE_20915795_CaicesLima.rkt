@@ -1,5 +1,6 @@
 #lang racket
 
+
 (provide (all-defined-out))
 
 #|
@@ -54,6 +55,32 @@
                                        (get-drive-name)
                                        (get-drive-cap drive-arg)
                                        content-arg)))
+
+
+(define (path-to-list2 path)
+  (cons
+    ""
+    ;(string-ref path 0)
+        (string-split (substring path 2) "/")))
+
+
+
+#|
+(existing-folder? (lambda (drive-arg folder-name)
+                          (if (not(member folder-name (map get-folder-name (get-drive-content drive-arg))))
+                              #f
+                              #t)))
+
+(define search-folder2 (lambda (drive-content folder-name path-list)
+                        (if(not(null?? path-list)))
+                           (if (equal? (car path-list) (get-folder-name (car drive-content)))
+                               ;si son iguales entonces encontre la carpeta
+                               ;y debo retornarla
+                               (car drive-content)
+                               (search-folder (cdr drive-content) folder-name target-path)
+                           
+|#
+
 
 
 (define drive1 (drive #\C "drive1" 1000))

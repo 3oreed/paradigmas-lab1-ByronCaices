@@ -1,0 +1,68 @@
+#lang racket
+
+(require "TDA_SYSTEM_20915795_CaicesLima.rkt")
+(provide (all-defined-out))
+
+(define make-file (lambda (file-name ;0
+                          create-date
+                          mod-date
+                          location
+                          creator
+                          size
+                          items
+                          security
+                          password
+                          content);9
+                        (list file-name
+                              create-date
+                              mod-date
+                              location
+                              creator
+                              size
+                              items
+                              security
+                              password
+                              content)))
+
+(define file (lambda (name)
+               (make-file name
+                          (crnt-date)
+                          (crnt-date)
+                          ""
+                          ""
+                          null
+                          null
+                          null
+                          ""
+                          null)))
+
+
+(define (get-file-name file)
+  (list-ref file 0))
+
+(define (get-create-date file)
+  (list-ref file 1))
+
+(define (get-mod-date file)
+  (list-ref file 2))
+
+(define (get-file-location file)
+  (list-ref file 3))
+
+(define (get-file-creator file)
+  (list-ref file 4))
+
+(define (get-file-size file)
+  (list-ref file 5))
+
+(define (get-items file)
+  (list-ref file 6))
+
+(define (get-file-security file)
+  (list-ref file 7))
+
+(define (get-file-pass file)
+  (list-ref file 8))
+
+(define (get-file-content file)
+  (list-ref file 9))

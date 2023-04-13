@@ -2,7 +2,10 @@
 
 (require "TDA_DRIVE_20915795_CaicesLima.rkt")
 (require "TDA_USER_20915795_CaicesLima.rkt")
+(require "TDA_FOLDER_20915795_CaicesLima.rkt")
+(require "TDA_FILE_20915795_CaicesLima.rkt")
 (require racket/date)
+(provide (all-defined-out))
 
 ; copy debe verificar que el archivo se encuentre en la ruta actual del
 ; system, si no, no puede ejecutar la funcion
@@ -150,6 +153,17 @@
                           #f
                           #t)))
 
+(define existing-user? (lambda (system-arg user)
+                          (if (not(member user (get-users system-arg)))
+                              #f
+                              #t)))
+
+(define existing-drive? (lambda (system-arg letter)
+                          (if (not(member letter (map get-letter (get-drives system-arg))))
+                              #f
+                              #t)))
+
+
 
 ; Si el drive no existe retorna F
 ; Si el drive existe retorna T
@@ -213,25 +227,8 @@
                                       (get-trashcan system-arg))
                           system-arg))))
                          
-(define login2 (lambda (system-arg)
-                (lambda (user-name)
-                  (if (and
-                       (not(loged-user? system-arg))
-                       (not(member user-name (get-users system-arg))))
-                         system-arg
-                         (make-system (get-system-name system-arg)
-                                      user-name
-                                      (get-path system-arg)                            
-                                      (get-current-drive system-arg)
-                                      (get-users system-arg)
-                                      (get-drives system-arg)
-                                      (get-system-date system-arg)
-                                      (get-trashcan system-arg))))))
 
-(define existing-user? (lambda (system-arg user)
-                          (if (not(member user (get-users system-arg)))
-                              #f
-                              #t)))
+
 
 (define login (lambda (system-arg)
                 (lambda (user-name)
@@ -266,10 +263,7 @@
                   
 
 
-(define existing-drive? (lambda (system-arg letter)
-                          (if (not(member letter (map get-letter (get-drives system-arg))))
-                              #f
-                              #t)))
+
 
 ; Funcion que dada una letra busca un drive
 ; en una lista de drives y lo retorna
@@ -313,6 +307,135 @@
                           system-arg))))
 
 
+(define (path-to-list path)
+  (cdr(cons
+    ""
+    ;(string-ref path 0)
+        (string-split (substring path 2) "/"))))
+
+#|
+(define search-folder (lambda (content folder-name path-list founded)
+                        (if (my-string-null? path-list)
+                            founded
+                            (search-folder (car(member folder-name (map get-folder-name (content))))
+                                            folder-name
+                                           (cdr path-list)
+                                           )
+                              '()))))
+|#
+
+
+;retorna una ruta de un drive
+;inp: "C:/folder1/folder1A"
+;out: drive-content de la ruta input
+(define busqueda2 (lambda (content new-folder path cola)
+                 (if (not(null? content))
+                   (if (equal? (car path) (get-folder-name(car content)))
+                       (busqueda (cdr content)
+                                 new-folder
+                                 (cdr path)
+                                 (cons (car content) cola))
+                       (busqueda (cdr content)
+                                 new-folder
+                                 path
+                                 cola))
+                   cola)))
+
+(define busqueda (lambda (content new-folder path cola)
+                 (if (not(null? content))
+                   (if (equal? (car path) (get-folder-name(car content)))
+                       (if(= (length path)1)
+                          (busqueda (cdr content)
+                                    new-folder
+                                    (cdr path)
+                                    ;(cons (car content) cola))
+                                    (cons (make-folder (get-folder-name (car content))
+                                                       (get-create-date (car content))
+                                                       (get-mod-date (car content))
+                                                       (get-folder-location (car content))
+                                                       "TEEEEST"
+                                                       ;(get-folder-creator (car content))
+                                                       (get-folder-size (car content))
+                                                       (get-items (car content))
+                                                       (get-folder-security (car content))
+                                                       (get-folder-pass(car content))
+                                                       (cons (folder new-folder)
+                                                             (get-folder-content (car content))))
+
+                                          cola))
+                          (busqueda (cdr content)
+                                    new-folder
+                                    (cdr path);(car content)=folder
+                                    (cons (car content) cola)))
+
+                       (busqueda (cdr content)
+                                 new-folder
+                                 path
+                                 cola))
+                   cola)))
+
+
+(define search-folder3 (lambda (content folder-name path-list)
+                        (if (my-string-null? path-list)
+                            '()
+                            (if(= (length path-list) 1)
+                              (cons
+                              (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                             folder-name
+                                             (cdr path-list))'())
+                              (cons
+                                  (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                                 folder-name
+                                                 (cdr path-list))
+                                  (add-subfolder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                                 (folder "folder1AA"))) ))))
+
+(define search-folder (lambda (content folder-name path-list)
+                        (if (and(null? path-list)
+                                (null? content))
+                            '()
+                            (if(= (length path-list) 1)
+                              (cons
+                              (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                             folder-name
+                                             (cdr path-list))'())
+                              (cons
+                                  (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                                 folder-name
+                                                 (cdr path-list))
+                                  (add-subfolder (car(my-member folder-name (map get-folder-name (if (string? content)
+                                                                                                  (list content)
+                                                                                                  content))))
+                                                 (folder "folder1AA"))) ))))
+
+
+(define my-member2 (lambda (elemento lista cola)
+                   (if (not(null? lista))
+                       (if (equal? elemento (car lista))
+                           lista
+                           (my-member2 elemento (cdr lista) (cons (car lista)cola)))
+                       (reverse cola))))
+
+(define my-member (lambda (elemento lista)
+                    (my-member2 elemento lista '())))
+                        
+                             
+(define algo (lambda (name)
+               (if (boolean? name)
+                   '()
+                   '())))
+
+
             
 ; EJEMPLOS
 
@@ -333,6 +456,10 @@
 
 (define S11 ((run S10 switch-drive) #\K))
 (define S12 ((run S11 switch-drive) #\C))
+
+
+
+
 
 
 
