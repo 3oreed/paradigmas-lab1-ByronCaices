@@ -147,20 +147,15 @@
 
 (define loged-user? (lambda (system-arg)
                       (if (my-string-null? (get-loged-user system-arg))
-                          #t
-                          #f)))
+                          #f
+                          #t)))
 
-(define existing-drive? (lambda (system-arg letter)
-                          (if (not(member letter (map get-letter (get-drives system-arg))))
-                              #t
-                              #f)))
 
-(define existing-drive2? (lambda (system-arg letter)
-                          (if (not(member letter (map get-letter (get-drives system-arg))))
-                              #t
-                              #f)))
+; Si el drive no existe retorna F
+; Si el drive existe retorna T
+
 ; Funcion que busca un drive en una lista de drives y lo retorna
-(define search-drive)
+;(define search-drive)
 ;(define registered? (lambda (system-arg))
 
 #|
@@ -185,7 +180,7 @@
 
 (define add-drive (lambda (system-arg)
                     (lambda (letter drive-name cap)
-                      (if (existing-drive? system-arg letter)
+                      (if (not(existing-drive? system-arg letter))
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        
@@ -218,9 +213,9 @@
                                       (get-trashcan system-arg))
                           system-arg))))
                          
-(define login (lambda (system-arg)
+(define login2 (lambda (system-arg)
                 (lambda (user-name)
-                  (if (or
+                  (if (and
                        (not(loged-user? system-arg))
                        (not(member user-name (get-users system-arg))))
                          system-arg
@@ -232,6 +227,27 @@
                                       (get-drives system-arg)
                                       (get-system-date system-arg)
                                       (get-trashcan system-arg))))))
+
+(define existing-user? (lambda (system-arg user)
+                          (if (not(member user (get-users system-arg)))
+                              #f
+                              #t)))
+
+(define login (lambda (system-arg)
+                (lambda (user-name)
+                  (if (and
+                       (not(loged-user? system-arg))
+                       (existing-user? system-arg user-name))
+                         
+                         (make-system (get-system-name system-arg)
+                                      user-name
+                                      (get-path system-arg)                            
+                                      (get-current-drive system-arg)
+                                      (get-users system-arg)
+                                      (get-drives system-arg)
+                                      (get-system-date system-arg)
+                                      (get-trashcan system-arg))
+                         system-arg))))
 
 (define logout (lambda (system-arg)
                  (make-system (get-system-name system-arg)
@@ -250,6 +266,29 @@
                   
 
 
+(define existing-drive? (lambda (system-arg letter)
+                          (if (not(member letter (map get-letter (get-drives system-arg))))
+                              #f
+                              #t)))
+
+; Funcion que dada una letra busca un drive
+; en una lista de drives y lo retorna
+
+(define lista-drives '((#\D "Util" 2000 ()) (#\C "SO" 1000 ())))
+
+                          
+
+(define search-drive (lambda (letter drives-list founded-drive)
+                       (if (and
+                            (not(null? drives-list))
+                            (equal? (get-letter (car drives-list)) letter))
+                               (cons (car drives-list) founded-drive)
+                               (if(not(null? drives-list))
+                                  (search-drive letter (cdr drives-list) founded-drive)
+                                  founded-drive))))
+                                  
+                               
+ 
 (define switch-drive (lambda (system-arg)
                     (lambda (letter)
                       (if (and
@@ -258,10 +297,14 @@
                           (make-system (get-system-name system-arg)
                                        (get-loged-user system-arg)
                                        
-                                       (string-append (string letter) ":/")
+                                       (if(null?(search-drive letter (get-drives system-arg) '()))
+                                           (get-path system-arg)
+                                           (string-append (string letter) ":/"))
                                         
-                                       (get-current-drive system-arg)
-                                           
+                                       (if(null?(search-drive letter (get-drives system-arg) '()))
+                                          (get-current-drive system-arg)
+                                          (search-drive letter (get-drives system-arg) '()))
+                                       ;'(1 2 3)    
                                        (get-users system-arg)
                                        
                                        (get-drives system-arg)
@@ -284,9 +327,12 @@
 
 (define S7 ((run S6 login) "user1"))
 (define S8 ((run S7 login) "user2"))
-;(define S99 ((run S7 login) "user3"))
+
 (define S9 (run S8 logout))
 (define S10 ((run S9 login) "user2"))
+
+(define S11 ((run S10 switch-drive) #\K))
+(define S12 ((run S11 switch-drive) #\C))
 
 
 
