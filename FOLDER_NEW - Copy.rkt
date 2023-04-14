@@ -1,6 +1,5 @@
 #lang racket
 
-(require "NEW_DRIVE.rkt")
 (require racket/date)
 (provide (all-defined-out))
 
@@ -87,22 +86,22 @@
 
 ;MODIFICADORES
 
-(define (buscar-folder-hijo folder name)
+(define (buscar-folder-hijo folder valor)
   (cond
     [(null? folder) #f]
-    [(equal? (folder-name folder) name) folder]
-    [else (buscar-folder-hijo-aux (folder-content-hijos folder) name)]))
+    [(equal? (folder-name folder) valor) folder]
+    [else (buscar-folder-hijo-aux (folder-content-hijos folder) valor)]))
 
-(define (buscar-folder-hijo-aux content-hijos name)
+(define (buscar-folder-hijo-aux content-hijos valor)
   (cond
     [(null? content-hijos) #f]
-    [(buscar-folder-hijo (car content-hijos) name) (car content-hijos)]
-    [else (buscar-folder-hijo-aux (cdr content-hijos) name)]))
+    [(buscar-folder-hijo (car content-hijos) valor) (car content-hijos)]
+    [else (buscar-folder-hijo-aux (cdr content-hijos) valor)]))
 
-(define (insertar-folder folder name)
+(define (insertar-folder folder valor)
   (cond
-    [(null? folder) (make-folder name '() '() "" "" '() '() '() "" '())]
-    [(buscar-folder-hijo folder name) folder] ; No agregar hijo repetido
+    [(null? folder) (make-folder valor '() '() "" "" '() '() '() "" '())]
+    [(buscar-folder-hijo folder valor) folder] ; No agregar hijo repetido
     [else (make-folder (folder-name folder)
                        (get-create-date folder)
                        (get-mod-date folder)
@@ -112,75 +111,46 @@
                        (get-items folder)
                        (get-folder-security folder)
                        (get-folder-pass folder)
-                       (cons (make-folder name (crnt-date-folder) (crnt-date-folder) "" "" '() '() '() "" '()) (folder-content-hijos folder)))]))
+                       (cons (make-folder valor '() '() "" "" '() '() '() "" '()) (folder-content-hijos folder)))]))
 
-
-(define (insertar-folder-en-hijos padre . nombres-folders)
-  (define (actualizar-hijos padre folder-buscado nueva-folder)
-    (make-folder (folder-name padre)
-                 (get-create-date padre)
-                 (get-mod-date padre)
-                 (get-folder-location padre)
-                 (get-folder-creator padre)
-                 (get-folder-size padre)
-                 (get-items padre)
-                 (get-folder-security padre)
-                 (get-folder-pass padre)
-                 (map (lambda (hijo)
-                        (if (equal? (folder-name hijo) folder-buscado)
-                            nueva-folder
-                            hijo))
-                      (folder-content-hijos padre))))
-  (if (null? nombres-folders)
-      padre
-      (let* ([folder-buscado (car nombres-folders)]
-             [folder-encontrado (buscar-folder-hijo padre folder-buscado)])
-        (if folder-encontrado
-            (actualizar-hijos padre folder-buscado
-                             (apply insertar-folder-en-hijos folder-encontrado (cdr nombres-folders)))
-            (let ([nueva-folder (make-folder folder-buscado
-                                              '() ; create-date
-                                              '() ; mod-date
-                                              "" ; location
-                                              "" ; creator
-                                              '() ; size
-                                              '() ; items
-                                              '() ; security
-                                              "" ; password
-                                              '())]) ; content-hijos
-              (if (null? (cdr nombres-folders))
-                  (insertar-folder padre folder-buscado)
-                  (insertar-folder-en-hijos
-                   (actualizar-hijos padre folder-buscado nueva-folder) (cdr nombres-folders))))))))
-
+(define (insertar-folder-en-hijos padre valor-hijo valor-nuevo)
+  (let ([folder-hijo (buscar-folder-hijo padre valor-hijo)])
+    (if folder-hijo
+        (make-folder (folder-name padre)
+                     (get-create-date padre)
+                     (get-mod-date padre)
+                     (get-folder-location padre)
+                     (get-folder-creator padre)
+                     (get-folder-size padre)
+                     (get-items padre)
+                     (get-folder-security padre)
+                     (get-folder-pass padre)
+                     (map (lambda (hijo)
+                            (if (equal? (folder-name hijo) valor-hijo)
+                                (insertar-folder hijo valor-nuevo)
+                                hijo))
+                          (folder-content-hijos padre)))
+        padre)))
 
 
 ;EJEMPLOS
 
-;(define f0 (folder "Folder 0"))
+(define folder-ejemplo (folder "Folder 0"))
 
-(define drive0 (drive #\C "drive1" 1000))
+(define arbol1 folder-ejemplo)
 
-(define f0 drive0)
+(define arbol2 (insertar-folder arbol1 "Folder 1"))
+(define arbol3 (insertar-folder arbol2 "Folder 2"))
+(define arbol4 (insertar-folder arbol3 "Folder 2"))
+(define arbol5 (insertar-folder arbol4 "Folder 3"))
 
-(define f1 (insertar-folder-en-hijos f0 "Folder 1"))
-
-
-(define f2 (insertar-folder-en-hijos f1 "Folder 1"))
-(define f3 (insertar-folder-en-hijos f2 "Folder 2"))
-(define f4 (insertar-folder-en-hijos f3 "Folder 2"))
-(define f5 (insertar-folder-en-hijos f4 "Folder 3"))
-
-(define f6 (insertar-folder-en-hijos f5 "Folder 1" "Subfolder 1"))
-(define f7 (insertar-folder-en-hijos f6 "Folder 1" "Subfolder 2"))
-(define f8 (insertar-folder-en-hijos f7 "Folder 1" "Subfolder 2"))
-(define f9 (insertar-folder-en-hijos f8 "Folder 1" "Subfolder 2" "Subsubfolder1"))
-
-;(define drive1 (drive #\C "drive1" 1000))
-
-;(define ff1 (insertar-folder drive1 "Folder 1!"))
+(define arbol6 (insertar-folder-en-hijos arbol5 "Folder 1" "Subfolder 1"))
+(define arbol7 (insertar-folder-en-hijos arbol6 "Folder 1" "Subfolder 2"))
+(define arbol8 (insertar-folder-en-hijos arbol7 "Folder 1" "Subfolder 2"))
 
 #|
+Aquí hay una descripción, dominio y recorrido para cada función creada
+en el código:
 
 make-folder
 

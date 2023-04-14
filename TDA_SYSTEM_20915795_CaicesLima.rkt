@@ -306,6 +306,22 @@
                                        (get-trashcan system-arg))
                           system-arg))))
 
+(define make-dir (lambda (system-arg folder-name)
+                   (make-system (get-system-name system-arg)
+                                      (get-loged-user system-arg)
+                                      (get-path system-arg)                            
+                                      (cons (insertar-folder-en-hijos
+                                            (car(get-current-drive system-arg))
+                                            folder-name)
+                                            '())
+                                      (get-users system-arg)
+                                      (get-drives system-arg)
+                                      (get-system-date system-arg)
+                                      (get-trashcan system-arg))))
+
+(define md (lambda (system-arg)
+             (lambda (folder-name)
+               (make-dir system-arg folder-name))))
 
 (define (path-to-list path)
   (cdr(cons
@@ -313,128 +329,9 @@
     ;(string-ref path 0)
         (string-split (substring path 2) "/"))))
 
-#|
-(define search-folder (lambda (content folder-name path-list founded)
-                        (if (my-string-null? path-list)
-                            founded
-                            (search-folder (car(member folder-name (map get-folder-name (content))))
-                                            folder-name
-                                           (cdr path-list)
-                                           )
-                              '()))))
-|#
 
 
-;retorna una ruta de un drive
-;inp: "C:/folder1/folder1A"
-;out: drive-content de la ruta input
-(define busqueda2 (lambda (content new-folder path cola)
-                 (if (not(null? content))
-                   (if (equal? (car path) (get-folder-name(car content)))
-                       (busqueda (cdr content)
-                                 new-folder
-                                 (cdr path)
-                                 (cons (car content) cola))
-                       (busqueda (cdr content)
-                                 new-folder
-                                 path
-                                 cola))
-                   cola)))
-
-(define busqueda (lambda (content new-folder path cola)
-                 (if (not(null? content))
-                   (if (equal? (car path) (get-folder-name(car content)))
-                       (if(= (length path)1)
-                          (busqueda (cdr content)
-                                    new-folder
-                                    (cdr path)
-                                    ;(cons (car content) cola))
-                                    (cons (make-folder (get-folder-name (car content))
-                                                       (get-create-date (car content))
-                                                       (get-mod-date (car content))
-                                                       (get-folder-location (car content))
-                                                       "TEEEEST"
-                                                       ;(get-folder-creator (car content))
-                                                       (get-folder-size (car content))
-                                                       (get-items (car content))
-                                                       (get-folder-security (car content))
-                                                       (get-folder-pass(car content))
-                                                       (cons (folder new-folder)
-                                                             (get-folder-content (car content))))
-
-                                          cola))
-                          (busqueda (cdr content)
-                                    new-folder
-                                    (cdr path);(car content)=folder
-                                    (cons (car content) cola)))
-
-                       (busqueda (cdr content)
-                                 new-folder
-                                 path
-                                 cola))
-                   cola)))
-
-
-(define search-folder3 (lambda (content folder-name path-list)
-                        (if (my-string-null? path-list)
-                            '()
-                            (if(= (length path-list) 1)
-                              (cons
-                              (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                             folder-name
-                                             (cdr path-list))'())
-                              (cons
-                                  (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                                 folder-name
-                                                 (cdr path-list))
-                                  (add-subfolder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                                 (folder "folder1AA"))) ))))
-
-(define search-folder (lambda (content folder-name path-list)
-                        (if (and(null? path-list)
-                                (null? content))
-                            '()
-                            (if(= (length path-list) 1)
-                              (cons
-                              (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                             folder-name
-                                             (cdr path-list))'())
-                              (cons
-                                  (search-folder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                                 folder-name
-                                                 (cdr path-list))
-                                  (add-subfolder (car(my-member folder-name (map get-folder-name (if (string? content)
-                                                                                                  (list content)
-                                                                                                  content))))
-                                                 (folder "folder1AA"))) ))))
-
-
-(define my-member2 (lambda (elemento lista cola)
-                   (if (not(null? lista))
-                       (if (equal? elemento (car lista))
-                           lista
-                           (my-member2 elemento (cdr lista) (cons (car lista)cola)))
-                       (reverse cola))))
-
-(define my-member (lambda (elemento lista)
-                    (my-member2 elemento lista '())))
-                        
-                             
-(define algo (lambda (name)
-               (if (boolean? name)
-                   '()
-                   '())))
-
+               
 
             
 ; EJEMPLOS
@@ -456,6 +353,15 @@
 
 (define S11 ((run S10 switch-drive) #\K))
 (define S12 ((run S11 switch-drive) #\C))
+
+(define S13 ((run S12 md) "folder1"))
+(define S14 ((run S13 md) "folder2"))
+(define S15 ((run S14 md) "folder2"))
+(define S16 ((run S15 md) "folder3"))
+
+
+
+
 
 
 

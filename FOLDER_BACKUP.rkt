@@ -115,8 +115,8 @@
                        (cons (make-folder name (crnt-date-folder) (crnt-date-folder) "" "" '() '() '() "" '()) (folder-content-hijos folder)))]))
 
 
-(define (insertar-folder-en-hijos padre . nombres-folders)
-  (define (actualizar-hijos padre folder-buscado nueva-folder)
+(define (insertar-folder-en-hijos padre . nombres-carpetas)
+  (define (actualizar-hijos padre carpeta-buscada nueva-carpeta)
     (make-folder (folder-name padre)
                  (get-create-date padre)
                  (get-mod-date padre)
@@ -127,18 +127,18 @@
                  (get-folder-security padre)
                  (get-folder-pass padre)
                  (map (lambda (hijo)
-                        (if (equal? (folder-name hijo) folder-buscado)
-                            nueva-folder
+                        (if (equal? (folder-name hijo) carpeta-buscada)
+                            nueva-carpeta
                             hijo))
                       (folder-content-hijos padre))))
-  (if (null? nombres-folders)
+  (if (null? nombres-carpetas)
       padre
-      (let* ([folder-buscado (car nombres-folders)]
-             [folder-encontrado (buscar-folder-hijo padre folder-buscado)])
-        (if folder-encontrado
-            (actualizar-hijos padre folder-buscado
-                             (apply insertar-folder-en-hijos folder-encontrado (cdr nombres-folders)))
-            (let ([nueva-folder (make-folder folder-buscado
+      (let* ([carpeta-buscada (car nombres-carpetas)]
+             [nodo-encontrado (buscar-folder-hijo padre carpeta-buscada)])
+        (if nodo-encontrado
+            (actualizar-hijos padre carpeta-buscada
+                             (apply insertar-folder-en-hijos nodo-encontrado (cdr nombres-carpetas)))
+            (let ([nueva-carpeta (make-folder carpeta-buscada
                                               '() ; create-date
                                               '() ; mod-date
                                               "" ; location
@@ -148,13 +148,33 @@
                                               '() ; security
                                               "" ; password
                                               '())]) ; content-hijos
-              (if (null? (cdr nombres-folders))
-                  (insertar-folder padre folder-buscado)
+              (if (null? (cdr nombres-carpetas))
+                  (insertar-folder padre carpeta-buscada)
                   (insertar-folder-en-hijos
-                   (actualizar-hijos padre folder-buscado nueva-folder) (cdr nombres-folders))))))))
+                   (actualizar-hijos padre carpeta-buscada nueva-carpeta) (cdr nombres-carpetas))))))))
 
 
+#|
+(define (insertar-folder-en-hijos padre name-hijo name-nuevo)
+  (let ([folder-hijo (buscar-folder-hijo padre name-hijo)])
+    (if folder-hijo
+        (make-folder (folder-name padre)
+                     (get-create-date padre)
+                     (get-mod-date padre)
+                     (get-folder-location padre)
+                     (get-folder-creator padre)
+                     (get-folder-size padre)
+                     (get-items padre)
+                     (get-folder-security padre)
+                     (get-folder-pass padre)
+                     (map (lambda (hijo)
+                            (if (equal? (folder-name hijo) name-hijo)
+                                (insertar-folder hijo name-nuevo)
+                                hijo))
+                          (folder-content-hijos padre)))
+        padre)))
 
+|#
 ;EJEMPLOS
 
 ;(define f0 (folder "Folder 0"))
