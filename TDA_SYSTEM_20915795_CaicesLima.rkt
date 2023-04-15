@@ -54,6 +54,9 @@
                               null) ;papelera
                  ))
 
+
+
+
 ; SELECTORES
 
 (define get-system-name (lambda (system)
@@ -281,7 +284,12 @@
                                   (search-drive letter (cdr drives-list) founded-drive)
                                   founded-drive))))
                                   
-                               
+(define remove-drive (lambda (system-arg letter drives-list)
+                       (remove
+                        (search-drive letter
+                                      (get-drives system-arg)
+                                      '())
+                        (get-drives system-arg))))
  
 (define switch-drive (lambda (system-arg)
                     (lambda (letter)
@@ -300,24 +308,121 @@
                                           (search-drive letter (get-drives system-arg) '()))
                                        ;'(1 2 3)    
                                        (get-users system-arg)
-                                       
+                                       ;quitar el que agrego a current-drive
+                                       ;y agregar el que viene de current-drive
                                        (get-drives system-arg)
                                        (get-system-date system-arg)
                                        (get-trashcan system-arg))
                           system-arg))))
 
+
+; MD y Funciones adicionales
+; MODIFICAR FOLDER DESDE SYSTEM
+
+(define (sys-buscar-folder-hijo folder name)
+  (cond
+    [(null? folder) #f]
+    [(equal? (folder-name folder) name) folder]
+    [else (sys-buscar-folder-hijo-aux (folder-content-hijos folder) name)]))
+
+(define (sys-buscar-folder-hijo-aux content-hijos name)
+  (cond
+    [(null? content-hijos) #f]
+    [(sys-buscar-folder-hijo (car content-hijos) name) (car content-hijos)]
+    [else (sys-buscar-folder-hijo-aux (cdr content-hijos) name)]))
+
+
+
+
+;###
+(define (sys-insertar-folder system-arg folder name)
+  (cond
+    [(null? folder) (make-folder name '() '() "" (get-loged-user system-arg) '() '() '() "" '())]
+    [(sys-buscar-folder-hijo folder name) folder] ; No agregar hijo repetido
+    [else (make-folder (folder-name folder)
+                       (get-create-date folder)
+                       (get-mod-date folder)
+                       (get-folder-location folder)
+                       (get-folder-creator folder)
+                       (get-folder-size folder)
+                       (get-items folder)
+                       (get-folder-security folder)
+                       (get-folder-pass folder)
+                       (cons (make-folder name
+                                          (crnt-date-folder)
+                                          (crnt-date-folder)
+                                          (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "")
+                                          (get-loged-user system-arg)
+                                          '()
+                                          '()
+                                          '()
+                                          ""
+                                          '())
+                             (folder-content-hijos folder)))]))
+
+
+
+;#####
+
+
+;######
+(define (sys-insertar-folder-en-hijos system-arg padre . nombres-folders)
+  (define (actualizar-hijos padre folder-buscado nueva-folder)
+    (make-folder (folder-name padre)
+                 (get-create-date padre)
+                 (get-mod-date padre)
+                 (get-folder-location padre)
+                 (get-folder-creator padre)
+                 (get-folder-size padre)
+                 (get-items padre)
+                 (get-folder-security padre)
+                 (get-folder-pass padre)
+                 (map (lambda (hijo)
+                        (if (equal? (folder-name hijo) folder-buscado)
+                            nueva-folder
+                            hijo))
+                      (folder-content-hijos padre))))
+  (if (null? nombres-folders)
+      padre
+      (let* ([folder-buscado (car nombres-folders)]
+             [folder-encontrado (sys-buscar-folder-hijo padre folder-buscado)])
+        (if folder-encontrado
+            (actualizar-hijos padre folder-buscado
+                             (apply sys-insertar-folder-en-hijos system-arg folder-encontrado (cdr nombres-folders)))
+            (let ([nueva-folder (make-folder folder-buscado
+                                              (crnt-date) ; create-date
+                                              (crnt-date) ; mod-date
+                                              (if (pair? (get-folder-location padre))
+                                                  (string-append (get-folder-location padre) "/" folder-buscado)
+                                                  (string-append "/" folder-buscado)) ; location
+                                              (get-loged-user system-arg) ; creator
+                                              '() ; size
+                                              '() ; items
+                                              '() ; security
+                                              "" ; password
+                                              '())]) ; content-hijos
+              (sys-insertar-folder system-arg
+                                   (actualizar-hijos padre folder-buscado nueva-folder)
+                                   folder-buscado))))))
+
+
+
+
 (define make-dir (lambda (system-arg folder-name)
                    (make-system (get-system-name system-arg)
-                                      (get-loged-user system-arg)
-                                      (get-path system-arg)                            
-                                      (cons (insertar-folder-en-hijos
-                                            (car(get-current-drive system-arg))
-                                            folder-name)
-                                            '())
-                                      (get-users system-arg)
-                                      (get-drives system-arg)
-                                      (get-system-date system-arg)
-                                      (get-trashcan system-arg))))
+                                (get-loged-user system-arg)
+                                (get-path system-arg)                            
+                                (list (sys-insertar-folder-en-hijos
+                                       system-arg
+                                       (car (get-current-drive system-arg))
+                                       folder-name))
+                                (get-users system-arg)
+                                (get-drives system-arg)
+                                (get-system-date system-arg)
+                                (get-trashcan system-arg))))
+
+
+
 
 (define md (lambda (system-arg)
              (lambda (folder-name)
@@ -351,13 +456,36 @@
 (define S9 (run S8 logout))
 (define S10 ((run S9 login) "user2"))
 
-(define S11 ((run S10 switch-drive) #\K))
-(define S12 ((run S11 switch-drive) #\C))
+;(define S100 ((run S10 md) "folder1"))
 
-(define S13 ((run S12 md) "folder1"))
-(define S14 ((run S13 md) "folder2"))
-(define S15 ((run S14 md) "folder2"))
-(define S16 ((run S15 md) "folder3"))
+;(define S11 ((run S10 switch-drive) #\K))
+;(define S12 ((run S11 switch-drive) #\D))
+
+;(define S13 ((run S12 md) "folder1"))
+;(define S14 ((run S13 md) "folder2"))
+;(define S15 ((run S14 md) "folder2"))
+;(define S16 ((run S15 md) "folder3"))
+
+;(define S17 ((run S16 switch-drive) #\D))
+
+
+;(define drive0 (drive #\C "drive1" 1000))
+
+;(define f0 drive0)
+
+;(define f1 (sys-insertar-folder-en-hijos S12 f0 "Folder 1"))
+;(define f2 (sys-insertar-folder-en-hijos S12 f1 "Folder 1" "Subfolder1"))
+
+
+;(define f2 (sys-insertar-folder-en-hijos f1 S12 "Folder 1"))
+;(define f3 (sys-insertar-folder-en-hijos f2 "Folder 2"))
+;(define f4 (sys-insertar-folder-en-hijos f3 "Folder 2"))
+;(define f5 (sys-insertar-folder-en-hijos f4 "Folder 3"))
+
+;(define f6 (sys-insertar-folder-en-hijos f5 "Folder 1" "Subfolder 1"))
+;(define f7 (sys-insertar-folder-en-hijos f6 "Folder 1" "Subfolder 2"))
+;(define f8 (sys-insertar-folder-en-hijos f7 "Folder 1" "Subfolder 2"))
+;(define f9 (sys-insertar-folder-en-hijos f8 "Folder 1" "Subfolder 2" "Subsubfolder1"))
 
 
 
