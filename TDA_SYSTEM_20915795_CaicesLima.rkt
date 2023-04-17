@@ -208,9 +208,9 @@
                                       
                                            
                                        (get-users system-arg)
-                                       (cons
+                                       (cons '()(cons
                                         (drive letter drive-name cap)
-                                        (get-drives system-arg))
+                                        (get-drives system-arg)))
                                        (get-system-date system-arg)
                                        (get-trashcan system-arg))
                           system-arg))))
@@ -291,7 +291,7 @@
                                       '())
                         (get-drives system-arg))))
  
-(define switch-drive (lambda (system-arg)
+(define switch-drive2 (lambda (system-arg)
                     (lambda (letter)
                       (if (and
                            (existing-drive? system-arg letter)
@@ -315,6 +315,57 @@
                                        (get-trashcan system-arg))
                           system-arg))))
 
+
+
+; Funcion que en una lista LISTA de listas Busca una LISTA current
+; y la reemplaza por una lista older
+
+;Funcion que recibe un current-drive y los system-drives
+
+(define compara-letter (lambda (drive1 drive2)
+                         (equal? (get-letter drive1)
+                                 (get-letter drive2))))
+
+
+
+(define my-replace (lambda (current older cola)
+                     (cond
+                       [(and(not(null? older))
+                            (compara-letter (car current) (car older)))
+                               (my-replace current (cdr older)
+                                           (cons (car current) cola))]
+                       [(and(not(null? older))
+                            (not(compara-letter (car current) (car older))))
+                             (my-replace current (cdr older)
+                                         (cons (car older) cola))]
+                       [else cola ])))
+
+
+(define switch-drive (lambda (system-arg)
+                    (lambda (letter)
+                      (if (and
+                           (existing-drive? system-arg letter)
+                           (loged-user? system-arg))
+                          (make-system (get-system-name system-arg)
+                                       (get-loged-user system-arg)
+                                       
+                                       (if(null?(search-drive letter (get-drives system-arg) '()))
+                                           (get-path system-arg)
+                                           (string-append (string letter) ":/"))
+                                        
+                                       (if(null?(search-drive letter (get-drives system-arg) '()))
+                                          (get-current-drive system-arg)
+                                          (search-drive letter (get-drives system-arg) '()))
+                                       ;'(1 2 3)    
+                                       (get-users system-arg)
+                                       ;quitar el que agrego a current-drive
+                                       ;y agregar el que viene de current-drive
+                                       (my-replace (get-current-drive system-arg)
+                                                   (get-drives system-arg)
+                                                   '())
+                                       (get-system-date system-arg)
+                                       (get-trashcan system-arg))
+                          system-arg))))
 
 ; MD y Funciones adicionales
 ; MODIFICAR FOLDER DESDE SYSTEM
@@ -458,13 +509,18 @@
 
 ;(define S100 ((run S10 md) "folder1"))
 
-(define S11 ((run S10 switch-drive) #\K))
-(define S12 ((run S11 switch-drive) #\C))
+(define S11 ((run S10 switch-drive2) #\K))
+(define S12 ((run S11 switch-drive2) #\C))
 
-(define S13 ((run S12 md) "folder1"))
-(define S14 ((run S13 md) "folder2"))
-(define S15 ((run S14 md) "folder2"))
-(define S16 ((run S15 md) "folder3"))
+;(define S13 ((run S12 md) "folder1"))
+;(define S14 ((run S13 md) "folder2"))
+;(define S15 ((run S14 md) "folder2"))
+;(define S16 ((run S15 md) "folder3"))
+
+;(define current-test (get-current-drive S16))
+
+;(define drives-test (get-drives S16))
+
 
 ;(define S17 ((run S16 switch-drive) #\D))
 
