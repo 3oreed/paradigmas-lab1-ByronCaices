@@ -337,7 +337,7 @@
 ;###
 (define (sys-insertar-folder system-arg folder name)
   (cond
-    [(null? folder) (make-folder name '() '() "" (get-loged-user system-arg) '() '() '() "" '())]
+    [(null? folder) (make-folder name '() '() (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "h") (get-loged-user system-arg) '() '() '() "" '())]
     [(sys-buscar-folder-hijo folder name) folder] ; No agregar hijo repetido
     [else (make-folder (folder-name folder)
                        (get-create-date folder)
@@ -458,13 +458,13 @@
 
 ;(define S100 ((run S10 md) "folder1"))
 
-;(define S11 ((run S10 switch-drive) #\K))
-;(define S12 ((run S11 switch-drive) #\D))
+(define S11 ((run S10 switch-drive) #\K))
+(define S12 ((run S11 switch-drive) #\C))
 
-;(define S13 ((run S12 md) "folder1"))
-;(define S14 ((run S13 md) "folder2"))
-;(define S15 ((run S14 md) "folder2"))
-;(define S16 ((run S15 md) "folder3"))
+(define S13 ((run S12 md) "folder1"))
+(define S14 ((run S13 md) "folder2"))
+(define S15 ((run S14 md) "folder2"))
+(define S16 ((run S15 md) "folder3"))
 
 ;(define S17 ((run S16 switch-drive) #\D))
 
