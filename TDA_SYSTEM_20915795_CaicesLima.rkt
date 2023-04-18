@@ -36,7 +36,7 @@
                          trashcan);7
                         (list system-name
                               loged-user
-                              current-path ;string-downcase
+                              (string-upcase current-path) ;string-downcase
                               current-drive
                               users
                               drives
@@ -204,13 +204,13 @@
                                        (string-append (string letter) ":/")
                                         
                                        ;(get-current-drive system-arg)
-                                       (drive letter drive-name cap)
+                                       (cons(drive letter drive-name cap)'())
                                       
                                            
                                        (get-users system-arg)
-                                       (cons '()(cons
+                                       (cons
                                         (drive letter drive-name cap)
-                                        (get-drives system-arg)))
+                                        (get-drives system-arg))
                                        (get-system-date system-arg)
                                        (get-trashcan system-arg))
                           system-arg))))
@@ -254,7 +254,7 @@
                                       ""
                                       (if (not(null?(get-current-drive system-arg)))
                                                      (string-append
-                                                         (string (get-letter (get-current-drive system-arg)))
+                                                         (string (get-letter (car(get-current-drive system-arg))))
                                                          ":/")
                                                      "")
                                       (get-current-drive system-arg)
@@ -485,10 +485,26 @@
     ;(string-ref path 0)
         (string-split (substring path 2) "/"))))
 
+(define path? (lambda (path)
+                (string-contains? path "/")))
 
+(define root? (lambda (path)
+                (if(and(path? path)
+                       (= (string-length path) 3))
+                   #t
+                   #f)))
+
+(define change-dir (lambda (system-arg argument)
+             (cond
+                 [(and (not(root? (get-path system-arg))) (equal? argument ".."))
+                  (string-join(reverse(cdr(reverse(string-split (get-path system-arg) "/"))))"/")]
+                 [(equal? argument "/")
+                  (substring (get-path system-arg) 0 3)]
+                 [(path? (get-path system-arg))
+                   ()
 
                
-
+;(string-join(reverse(cdr(reverse(string-split "C:/Folder1/Folder11" "/"))))"/")
             
 ; EJEMPLOS
 
@@ -509,13 +525,13 @@
 
 ;(define S100 ((run S10 md) "folder1"))
 
-(define S11 ((run S10 switch-drive2) #\K))
-(define S12 ((run S11 switch-drive2) #\C))
+(define S11 ((run S10 switch-drive) #\K))
+(define S12 ((run S11 switch-drive) #\C))
 
-;(define S13 ((run S12 md) "folder1"))
-;(define S14 ((run S13 md) "folder2"))
-;(define S15 ((run S14 md) "folder2"))
-;(define S16 ((run S15 md) "folder3"))
+(define S13 ((run S12 md) "folder1"))
+(define S14 ((run S13 md) "folder2"))
+(define S15 ((run S14 md) "folder2"))
+(define S16 ((run S15 md) "folder3"))
 
 ;(define current-test (get-current-drive S16))
 
