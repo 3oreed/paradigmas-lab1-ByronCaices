@@ -494,6 +494,7 @@
                    #t
                    #f)))
 
+#|
 (define change-dir (lambda (system-arg argument)
              (cond
                  [(and (not(root? (get-path system-arg))) (equal? argument ".."))
@@ -502,7 +503,7 @@
                   (substring (get-path system-arg) 0 3)]
                  [(path? (get-path system-arg))
                    ()
-
+|#
                
 ;(string-join(reverse(cdr(reverse(string-split "C:/Folder1/Folder11" "/"))))"/")
             
