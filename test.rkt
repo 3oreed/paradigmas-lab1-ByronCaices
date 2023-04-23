@@ -466,7 +466,7 @@
                                 (list (sys-insertar-folder-en-hijos
                                        system-arg
                                        (car (get-current-drive system-arg))
-                                       (path-to-list folder-name)))
+                                       folder-name))
                                 (get-users system-arg)
                                 (get-drives system-arg)
                                 (get-system-date system-arg)
@@ -480,9 +480,10 @@
                (make-dir system-arg folder-name))))
 
 (define (path-to-list path)
-        (if (path? path)
-            (string-split path "/")
-            path))
+  (cdr(cons
+    ""
+    ;(string-ref path 0)
+        (string-split (substring path 2) "/"))))
 
 (define path? (lambda (path)
                 (string-contains? path "/")))
