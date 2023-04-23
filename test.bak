@@ -36,7 +36,7 @@
                          trashcan);7
                         (list system-name
                               loged-user
-                              current-path ;string-downcase
+                              (string-upcase current-path) ;string-downcase
                               current-drive
                               users
                               drives
@@ -418,7 +418,6 @@
 
 ;######
 (define (sys-insertar-folder-en-hijos system-arg padre . nombres-folders)
-
   (define (actualizar-hijos padre folder-buscado nueva-folder)
     (make-folder (folder-name padre)
                  (get-create-date padre)
@@ -440,7 +439,6 @@
              [folder-encontrado (sys-buscar-folder-hijo padre folder-buscado)])
         (if folder-encontrado
             (actualizar-hijos padre folder-buscado
-                              
                              (apply sys-insertar-folder-en-hijos system-arg folder-encontrado (cdr nombres-folders)))
             (let ([nueva-folder (make-folder folder-buscado
                                               (crnt-date) ; create-date
@@ -457,6 +455,7 @@
               (sys-insertar-folder system-arg
                                    (actualizar-hijos padre folder-buscado nueva-folder)
                                    folder-buscado))))))
+
 
 
 
@@ -596,15 +595,15 @@
 ;(define S17 ((run S16 switch-drive) #\D))
 
 
-;(define drive0 (drive #\C "drive1" 1000))
+(define drive0 (drive #\C "drive1" 1000))
 
-;(define f0 drive0)
+(define f0 drive0)
 
-;(define f1 (sys-insertar-folder-en-hijos S12 f0 "Folder 1"))
-;(define f2 (sys-insertar-folder-en-hijos S12 f1 "Folder 1" "Subfolder1"))
+(define f1 (sys-insertar-folder-en-hijos S12 f0 "Folder 1"))
+(define f2 (sys-insertar-folder-en-hijos S12 f1 "Folder 1" "Subfolder1"))
 
-;(define f3 (sys-insertar-folder-en-hijos S12 f2 "Folder 2"))
-;(define f4 (sys-insertar-folder-en-hijos S12 f3 "Folder 2"))
+(define f3 (sys-insertar-folder-en-hijos S12 f2 "Folder 2"))
+(define f4 (sys-insertar-folder-en-hijos S12 f3 "Folder 2"))
 ;(define f5 (sys-insertar-folder-en-hijos f4 "Folder 3"))
 
 ;(define f6 (sys-insertar-folder-en-hijos f5 "Folder 1" "Subfolder 1"))
