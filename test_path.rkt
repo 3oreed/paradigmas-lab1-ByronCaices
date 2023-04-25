@@ -255,7 +255,7 @@
                                       (if (not(null?(get-current-drive system-arg)))
                                                      (string-append
                                                          (string (get-letter (car(get-current-drive system-arg))))
-                                                         ":")
+                                                         ":/")
                                                      "")
                                       (get-current-drive system-arg)
                                       ;(car (get-drives system-arg))
@@ -301,7 +301,7 @@
                                        
                                        (if(null?(search-drive letter (get-drives system-arg) '()))
                                            (get-path system-arg)
-                                           (string-append (string letter) ":"))
+                                           (string-append (string letter) ":/"))
                                         
                                        (if(null?(search-drive letter (get-drives system-arg) '()))
                                           (get-current-drive system-arg)
@@ -598,7 +598,7 @@
                               (car(reverse(string-split (get-path system-arg) "/")))))
                   (string-append (get-path system-arg) "/" argument)]
                   [else
-                    ;(display "ERROR: El sistema no pudo encontrar la ruta especificada\n")
+                    (display "ERROR: El sistema no pudo encontrar la ruta especificada\n")
                     (get-path system-arg)])))
 
 (define cd (lambda (system-arg)
@@ -614,6 +614,8 @@
 
                   
 
+               
+;(string-join(reverse(cdr(reverse(string-split "C:/Folder1/Folder11" "/"))))"/")
             
 ; EJEMPLOS
 
@@ -672,6 +674,15 @@
 ;vuelve a la raíz de la unidad c:/
 (define S26 ((run S24 cd) "/"))
 
+;h
+
+
+;(define current-test (get-current-drive S16))
+
+;(define drives-test (get-drives S16))
+
+
+;(define S17 ((run S16 switch-drive) #\D))
 
 
 (define drive0 (drive #\C "drive1" 1000))
