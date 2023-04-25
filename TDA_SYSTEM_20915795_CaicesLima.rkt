@@ -255,7 +255,7 @@
                                       (if (not(null?(get-current-drive system-arg)))
                                                      (string-append
                                                          (string (get-letter (car(get-current-drive system-arg))))
-                                                         ":")
+                                                         ":/")
                                                      "")
                                       (get-current-drive system-arg)
                                       ;(car (get-drives system-arg))
@@ -291,31 +291,6 @@
                                       '())
                         (get-drives system-arg))))
  
-(define switch-drive2 (lambda (system-arg)
-                    (lambda (letter)
-                      (if (and
-                           (existing-drive? system-arg letter)
-                           (loged-user? system-arg))
-                          (make-system (get-system-name system-arg)
-                                       (get-loged-user system-arg)
-                                       
-                                       (if(null?(search-drive letter (get-drives system-arg) '()))
-                                           (get-path system-arg)
-                                           (string-append (string letter) ":"))
-                                        
-                                       (if(null?(search-drive letter (get-drives system-arg) '()))
-                                          (get-current-drive system-arg)
-                                          (search-drive letter (get-drives system-arg) '()))
-                                       ;'(1 2 3)    
-                                       (get-users system-arg)
-                                       ;quitar el que agrego a current-drive
-                                       ;y agregar el que viene de current-drive
-                                       (get-drives system-arg)
-                                       (get-system-date system-arg)
-                                       (get-trashcan system-arg))
-                          system-arg))))
-
-
 
 ; Funcion que en una lista LISTA de listas Busca una LISTA current
 ; y la reemplaza por una lista older
@@ -385,39 +360,12 @@
 
 
 
-;###
-(define (sys-insertar-folder2 system-arg folder name)
-  (cond
-    [(null? folder) (make-folder name '() '() (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "h") (get-loged-user system-arg) '() '() '() "" '())]
-    [(sys-buscar-folder-hijo folder name) folder] ; No agregar hijo repetido
-    [else (make-folder (folder-name folder)
-                       (get-create-date folder)
-                       (get-mod-date folder)
-                       (get-folder-location folder)
-                       (get-folder-creator folder)
-                       (get-folder-size folder)
-                       (get-items folder)
-                       (get-folder-security folder)
-                       (get-folder-pass folder)
-                       (cons (make-folder name
-                                          (crnt-date-folder)
-                                          (crnt-date-folder)
-                                          (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "")
-                                          (get-loged-user system-arg)
-                                          '()
-                                          '()
-                                          '()
-                                          ""
-                                          '())
-                             (folder-content-hijos folder)))]))
-
-
 
 ;#####
 
 (define (sys-insertar-folder system-arg folder name)
   (cond
-    [(null? folder) (make-folder name '() '() (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "h") (get-loged-user system-arg) '() '() '() "" '())]
+    [(null? folder) (make-folder name (get-system-date system-arg) (get-system-date system-arg) (get-path system-arg) (get-loged-user system-arg) '() '() '() "" '())]
     [(sys-buscar-folder-hijo folder name) #f] ; Devolver #f cuando se encuentra un duplicado
     [else (make-folder (folder-name folder)
                        (get-create-date folder)
@@ -429,9 +377,9 @@
                        (get-folder-security folder)
                        (get-folder-pass folder)
                        (cons (make-folder name
-                                          (crnt-date-folder)
-                                          (crnt-date-folder)
-                                          (if (pair? (get-folder-location folder)) (string-append (get-folder-location folder) "/" name) "")
+                                          (get-system-date system-arg)
+                                          (get-system-date system-arg)
+                                          (get-path system-arg)
                                           (get-loged-user system-arg)
                                           '()
                                           '()
@@ -441,66 +389,6 @@
                              (folder-content-hijos folder)))]))
 
 
-
-;######
-(define (sys-insertar-folder-en-hijos2 system-arg padre nombres-folders)
-  (define (actualizar-hijos padre folder-buscado nueva-folder)
-    (make-folder (folder-name padre)
-                 (get-create-date padre)
-                 (get-mod-date padre)
-                 (get-folder-location padre)
-                 (get-folder-creator padre)
-                 (get-folder-size padre)
-                 (get-items padre)
-                 (get-folder-security padre)
-                 (get-folder-pass padre)
-                 (map (lambda (hijo)
-                        (if (equal? (folder-name hijo) folder-buscado)
-                            nueva-folder
-                            hijo))
-                      (folder-content-hijos padre))))
-  (if (null? nombres-folders)
-      padre
-      (let* ([folder-buscado (car nombres-folders)]
-             [folder-encontrado (sys-buscar-folder-hijo padre folder-buscado)])
-        (if folder-encontrado
-            (actualizar-hijos padre folder-buscado
-                             (apply sys-insertar-folder-en-hijos system-arg folder-encontrado (cdr nombres-folders)))
-            (let ([nueva-folder (make-folder folder-buscado
-                                              (crnt-date) ; create-date
-                                              (crnt-date) ; mod-date
-                                              (if (pair? (get-folder-location padre))
-                                                  (string-append (get-folder-location padre) "/" folder-buscado)
-                                                  (string-append "/" folder-buscado)) ; location
-                                              (get-loged-user system-arg) ; creator
-                                              '() ; size
-                                              '() ; items
-                                              '() ; security
-                                              "" ; password
-                                              '())]) ; content-hijos
-              (sys-insertar-folder system-arg
-                                   (actualizar-hijos padre folder-buscado nueva-folder)
-                                   folder-buscado))))))
-
-
-
-
-(define make-dir2 (lambda (system-arg folder-name)
-                   (make-system (get-system-name system-arg)
-                                (get-loged-user system-arg)
-                                (get-path system-arg)                            
-                                (list (sys-insertar-folder-en-hijos
-                                       system-arg
-                                       (car (get-current-drive system-arg))
-                                       (if (root? (get-path system-arg))
-                                           (cons folder-name '())
-                                           (path-to-list (string-append
-                                                         (get-path system-arg)
-                                                         "/" folder-name)))))
-                                (get-users system-arg)
-                                (get-drives system-arg)
-                                (get-system-date system-arg)
-                                (get-trashcan system-arg))))
 
 (define (sys-insertar-folder-en-hijos system-arg padre nombres-folders)
   (define (actualizar-hijos padre folder-buscado nueva-folder)
@@ -526,11 +414,9 @@
             (actualizar-hijos padre folder-buscado
                              (sys-insertar-folder-en-hijos system-arg folder-encontrado (cdr nombres-folders))) ; Cambiado aquí
             (let ([nueva-folder (make-folder folder-buscado
-                                              (crnt-date) ; create-date
-                                              (crnt-date) ; mod-date
-                                              (if (pair? (get-folder-location padre))
-                                                  (string-append (get-folder-location padre) "/" folder-buscado)
-                                                  (string-append "/" folder-buscado)) ; location
+                                              (get-system-date system-arg) ; create-date
+                                              (get-system-date system-arg) ; mod-date
+                                              (get-path system-arg) ; location
                                               (get-loged-user system-arg) ; creator
                                               '() ; size
                                               '() ; items
@@ -598,7 +484,7 @@
                               (car(reverse(string-split (get-path system-arg) "/")))))
                   (string-append (get-path system-arg) "/" argument)]
                   [else
-                    ;(display "ERROR: El sistema no pudo encontrar la ruta especificada\n")
+                    (display "ERROR: El sistema no pudo encontrar la ruta especificada\n")
                     (get-path system-arg)])))
 
 (define cd (lambda (system-arg)
@@ -612,6 +498,9 @@
                                 (get-system-date system-arg)
                                 (get-trashcan system-arg)))))
 
+                  
+
+            
                   
 
             
