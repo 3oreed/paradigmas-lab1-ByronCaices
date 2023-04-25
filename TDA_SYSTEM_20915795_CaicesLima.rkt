@@ -470,6 +470,7 @@
                    #t
                    #f)))
 
+(define especific-path? (lambda (path)))
 
 (define change-dir (lambda (system-arg argument)
              (cond
@@ -561,6 +562,18 @@
 ;vuelve a la raíz de la unidad c:/
 (define S26 ((run S24 cd) "/"))
 
+;se cambia de unidad
+(define S27 ((run S26 switch-drive) #\D))
+
+;crea carpeta e ingresa a carpeta
+(define S28 ((run S27 md) "folder5"))
+(define S29 ((run S28 cd) "folder5"))
+
+;se cambia de carpeta en base a la ruta especificada
+(define S30 ((run S29 cd) "C:/folder1/"))
+
+;si es una ruta especificada que incluye un drive distinto del current primero debemos
+;ejecutar un switch drive sl drive especificado y luego realizar el cambio en el system path
 
 
 (define drive0 (drive #\C "drive1" 1000))
