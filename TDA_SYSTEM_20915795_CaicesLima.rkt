@@ -674,7 +674,7 @@
 ;vuelve a la raíz de la unidad c:/
 (define S26 ((run S24 cd) "/"))
 
-
+;h
 
 
 ;(define current-test (get-current-drive S16))
