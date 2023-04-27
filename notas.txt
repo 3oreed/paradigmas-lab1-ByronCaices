@@ -1,0 +1,13 @@
+sys-buscar-folder-hijo
+
+-recibe un folder* y un name
+-Si folder* es null -> F
+-Si folder-name de folder* es = name -> Folder (encontro el folder buscado)
+-Else como name no coincide entramos al contenido de folder* y buscamos ahí con 
+
+sys-buscar-folder-hijo-aux
+
+realiza lo mismo que la anterior y con car content-hijos toma una carpeta de ahí
+si no coincide realiza la llamada auxiliar nuevamente
+
+RECURSION ARBOREA
