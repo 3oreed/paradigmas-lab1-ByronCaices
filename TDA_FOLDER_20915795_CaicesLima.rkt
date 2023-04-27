@@ -43,27 +43,6 @@
                              content-hijos)))
 
 
-(define make-folder2 (lambda (folder-name ;0
-                                create-date ;1
-                                mod-date ;2
-                                folder-location ;3
-                                folder-creator ;4
-                                folder-size ;5
-                                items ;6
-                                folder-security ;7
-                                folder-pass ;8
-                                content-hijos) ;9
-                       (list folder-name
-                             (if (null? create-date) "" create-date)
-                             (if (null? mod-date) "" mod-date)
-                             (if (null? folder-location) "" folder-location)
-                             (if (null? folder-creator) "" folder-creator)
-                             (if (null? folder-size) "" folder-size)
-                             (if (null? items) '() items)
-                             (if (null? folder-security) '() folder-security)
-                             (if (null? folder-pass) "" folder-pass)
-                             (if (null? content-hijos) '() content-hijos))))
-
 
 
 (define folder (lambda (name)

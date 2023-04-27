@@ -25,12 +25,6 @@
                                      cap
                                      null)))
 
-(define set-drive-content (lambda (drive-arg content)
-                            (make-drive (get-letter drive-arg)
-                                        (get-drive-name drive-arg)
-                                        (get-drive-cap drive-arg)
-                                        content)))
-
 (define get-letter (lambda (drive-arg)
                      (car drive-arg)))
 
