@@ -680,8 +680,8 @@
 ;se cambia de carpeta en base a la ruta especificada
 (define S30 ((run S29 cd) "C:/folder1")) ;/
 
-;(define S31 ((run S30 switch-drive) #\D))
-;(define S32 ((run S31 cd) "D:/folder5"))
+(define S31 ((run S30 switch-drive) #\D))
+(define S32 ((run S31 cd) "D:/folder5"))
 ;si es una ruta especificada que incluye un drive distinto del current primero debemos
 ;ejecutar un switch drive sl drive especificado y luego realizar el cambio en el system path
 
