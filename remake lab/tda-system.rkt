@@ -203,8 +203,11 @@
                               (let ([current-drive (get-current-drive system-arg)])
                                 (if (existing-folder? folder-name system-arg)
                                     current-drive
-                                    (cons (sys-make-folder folder-name system-arg)
-                                          current-drive)))))
+                                    (make-drive (get-letter current-drive)
+                                                (get-drive-name current-drive)
+                                                (get-drive-cap current-drive)
+                                                (cons (sys-make-folder folder-name system-arg)
+                                                      (get-drive-content current-drive)))))))
 
                                     
 
