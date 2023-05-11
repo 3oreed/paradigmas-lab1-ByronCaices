@@ -1,6 +1,7 @@
 #lang racket
 (require "tda-drive.rkt")
 (require "tda-user.rkt")
+(require "tda-folder.rkt")
 (require racket/date)
 (provide (all-defined-out))
 
@@ -24,14 +25,16 @@
                          users ;3
                          system-date ;4
                          drives;5
-                         trashcan);6
+                         trashcan ;6
+                         paths);7
                         (list system-name
                               loged-user
                               current-path ;string-downcase
                               users 
                               system-date
                               drives
-                              trashcan)))
+                              trashcan
+                              paths)))
 
 (define system (lambda (name)
                  (make-system name
@@ -40,7 +43,8 @@
                               null ;users
                               (crnt-date) ;fecha
                               null;drives
-                              null) ;papelera
+                              null ;papelera
+                              null) ;paths
                  ))
 
 
@@ -51,6 +55,8 @@
 (define (get-system-date system) (list-ref system 4))
 (define (get-drives system) (list-ref system 5))
 (define (get-trashcan system) (list-ref system 6))
+(define (get-paths system) (list-ref system 7))
+(define (get-current-drive system) (car (get-drives system)))
 
 
 (define run (lambda (system cmd) (cmd system)))
@@ -80,7 +86,9 @@
                                        (get-system-date  system-arg) 
                                        (cons (drive letter name cap)
                                              (get-drives  system-arg))
-                                       (get-trashcan  system-arg))))))
+                                       (get-trashcan  system-arg)
+                                       (cons (string-append (string letter) ":/")
+                                             (get-paths system-arg)))))))
 
 (define existing-user? (lambda (user-name users)
                         (cond
@@ -100,7 +108,8 @@
                                         (get-users  system-arg))
                                        (get-system-date  system-arg) 
                                        (get-drives  system-arg)
-                                       (get-trashcan  system-arg))))))
+                                       (get-trashcan  system-arg)
+                                       (get-paths system-arg))))))
 
 (define my-string-null? (lambda (str)
                           (equal? str "")))
@@ -117,7 +126,8 @@
                                        (get-users  system-arg)
                                        (get-system-date  system-arg) 
                                        (get-drives  system-arg)
-                                       (get-trashcan  system-arg))
+                                       (get-trashcan  system-arg)
+                                       (get-paths system-arg))
                           system-arg))))
 
 (define logout (lambda (system-arg)
@@ -129,8 +139,10 @@
                                   (get-users  system-arg)
                                   (get-system-date  system-arg) 
                                   (get-drives  system-arg)
-                                  (get-trashcan  system-arg)))))
+                                  (get-trashcan  system-arg)
+                                  (get-paths system-arg)))))
 
+;Funcion que mueve un elemento de una lista 
 (define move-to-head (lambda (e lista)
                        (cons (first (filter
                                      (lambda (x) (char=? e (first x)))
@@ -151,9 +163,74 @@
                                           (get-users  system-arg)
                                           (get-system-date  system-arg) 
                                           (move-to-head letter (get-drives system-arg))
-                                          (get-trashcan  system-arg))
+                                          (get-trashcan  system-arg)
+                                          (get-paths system-arg))
                              system-arg))))
 
+
+(define sys-make-folder (lambda (folder-name system-arg)
+                          (make-folder folder-name
+                                       (get-system-date system-arg)
+                                       (get-system-date system-arg)
+                                       (string-append (get-current-path system-arg)
+                                                      (string-append folder-name "/"))
+                                       (get-loged-user system-arg)
+                                       0 ;folder-size
+                                       0  ;cant-items
+                                       null ; folder-security
+                                       "" ;pass
+                                       "Folder*"))) ;type
+                                       
+;funcion que dada una ruta de un system busca el drive que corresponde y lo retorna
+;"C:/"
+(define search-drive-by-path (lambda (system-arg)
+                               (let ([letter (string-ref(car(string-split (get-current-path system-arg) "/"))0)])
+                                 letter)))
+
+;funcion que verifica si existe un folder-new en la ruta actual del system
+
+(define existing-folder? (lambda (folder-name system-arg)
+                           (let ([new-path (string-append (get-current-path system-arg) folder-name "/")])
+                             (if (member new-path (get-paths system-arg))
+                                 #t
+                                 #f))))
+
+; dado el current-path de system y un folder-name,
+; se toma el current-drive y se le agrega a su contenido el
+; si y solo si nuevo folder si este no existe
+; retorna un drive
+(define add-folder-to-drive (lambda (folder-name system-arg)
+                              (let ([current-drive (get-current-drive system-arg)])
+                                (if (existing-folder? folder-name system-arg)
+                                    current-drive
+                                    (cons (sys-make-folder folder-name system-arg)
+                                          current-drive)))))
+
+                                    
+
+(define md (lambda (system-arg)
+             (lambda (folder-name)
+               (if (existing-folder? folder-name system-arg)
+                   system-arg
+                   (make-system (get-system-name  system-arg) 
+                                (get-loged-user system-arg)
+                                (get-current-path system-arg)
+                                (get-users  system-arg)
+                                (get-system-date  system-arg) 
+                                (cons (add-folder-to-drive folder-name system-arg)
+                                      (cdr(get-drives system-arg)));;
+                                (get-trashcan  system-arg)
+                                (cons (string-append (get-current-path system-arg) folder-name "/")
+                                      (get-paths system-arg)))))))
+
+(define STEST (make-system "newSystem"
+                           "user2"
+                           "C:/"
+                           '("user2" "user1")
+                           "16:24 - 11/5/2023"
+                           '('(#\C "SO" 1000 ()) '(#\D "Util" 2000 ()))
+                           '()
+                           '("D:/" "C:/" )))                                        
                             
 
 ; EJEMPLOS
@@ -181,5 +258,14 @@
 ;cambios de unidad, incluyendo unidad inexistente K
 (define S11 ((run S10 switch-drive) #\K))
 (define S12 ((run S11 switch-drive) #\C))
+
+;añadiendo carpetas. Incluye casos de carpetas duplicadas.
+(define S13 ((run S12 md) "folder1"))
+(define S14 ((run S13 md) "folder2"))
+
+(define S15 ((run S14 md) "folder2"))
+(define S16 ((run S15 md) "folder3"))
+
+
 
 
