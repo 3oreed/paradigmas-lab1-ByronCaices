@@ -147,7 +147,7 @@
                          (if (existing-letter? letter (get-drives system-arg))
                              (make-system (get-system-name  system-arg) 
                                           (get-loged-user system-arg)
-                                          (get-current-path system-arg)
+                                          (string-append (string letter) ":/")
                                           (get-users  system-arg)
                                           (get-system-date  system-arg) 
                                           (move-to-head letter (get-drives system-arg))
