@@ -90,6 +90,7 @@
                                        (cons (string-append (string letter) ":/")
                                              (get-paths system-arg)))))))
 
+;funcion que verifica si un user existe o no
 (define existing-user? (lambda (user-name users)
                         (cond
                           [(null? users) #f]
@@ -111,6 +112,7 @@
                                        (get-trashcan  system-arg)
                                        (get-paths system-arg))))))
 
+;Funcion que verifica si un string es vacio o nulo
 (define my-string-null? (lambda (str)
                           (equal? str "")))
 
@@ -142,7 +144,7 @@
                                   (get-trashcan  system-arg)
                                   (get-paths system-arg)))))
 
-;Funcion que mueve un elemento de una lista 
+;Funcion que mueve un elemento de una lista a su cabeza
 (define move-to-head (lambda (e lista)
                        (cons (first (filter
                                      (lambda (x) (char=? e (first x)))
@@ -167,7 +169,7 @@
                                           (get-paths system-arg))
                              system-arg))))
 
-
+; constructor de un folder dado un system
 (define sys-make-folder (lambda (folder-name system-arg)
                           (make-folder folder-name
                                        (get-system-date system-arg)
