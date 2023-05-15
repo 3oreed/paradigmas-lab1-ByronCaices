@@ -335,7 +335,7 @@
                                    (get-system-date system-arg)
                                    (get-system-date system-arg)
                                    security
-                                   (get-current-path system-arg)
+                                   (string-append (get-current-path system-arg) file-name)
                                    "File*");9
                         ))
 
@@ -398,9 +398,35 @@
 
 ;retorna el drive-content actualizada
 (define del-file-from-drive (lambda (file-name drive-content cola)
+                              (cond
+                                [(null? drive-content) (reverse cola)]
+                                [(equal? (get-name (car drive-content)) file-name)
+                                 (del-file-from-drive file-name (cdr drive-content) cola)]
+                                [else
+                                 (del-file-from-drive file-name
+                                                      (cdr drive-content)
+                                                      (cons (car drive-content)
+                                                            cola))])))
+
+(define update-drive-content (lambda (file-name drive-arg)
+                               (make-drive (get-letter drive-arg)
+                                           (get-drive-name drive-arg)
+                                           (get-drive-cap drive-arg)
+                                           (del-file-from-drive file-name (get-drive-content drive-arg) '()))))
+
+(define get-file-from-drive (lambda (file-name drive-content cola)
+                              (cond
+                                [(not(null? cola)) cola]
+                                [(equal? (get-name (car drive-content)) file-name)
+                                 (get-file-from-drive file-name
+                                                      (cdr drive-content)
+                                                      (cons (car drive-content)
+                                                            cola))]
+                                [else
+                                 (get-file-from-drive file-name (cdr drive-content) cola)])))
 
                                  
-; del me                                  
+                               
 
 (define del (lambda (system-arg)
               (lambda (name)
@@ -410,8 +436,14 @@
                              (get-users  system-arg)
                              (get-system-date system-arg) 
                              ;(get-drives system-arg)
-                             (del-file-from-drive name (get-current-drive system-arg) '())
-                             (get-trashcan  system-arg)
+                             (cons (update-drive-content name
+                                                         ;drive-arg
+                                                         (get-current-drive system-arg))
+                                   (cdr(get-drives system-arg))); con cdr se elimina el current drive
+                             (cons (get-file-from-drive name
+                                                        (get-drive-content(get-current-drive system-arg))
+                                                        '())
+                                   (get-trashcan  system-arg))
                              (del-file-from-paths name system-arg)))))
 
 (define STEST (make-system "newSystem"
@@ -507,5 +539,16 @@
 ;;(define S39 ((run S35 cd) ".."))
 ;;(define S40 ((run S35 del) "folder1"))
 
+;borrando una carpeta
+;(define S41 ((run S39 rd) "folder1"))  ;no debería borrarla, pues tiene archivos
+;(define S42 ((run S41 cd) "folder1"))
+;(define S43 ((run S42 del) "*.*"))
+;(define S44 ((run S43 cd) ".."))
+;(define S45 ((run S44 rd) "folder1"))
+
+;copiando carpetas y archivos
+;(define S46 ((run S35 copy) "foo1.txt" "Cc:/folder3/"))
+;(define S47 ((run S46 cd) ".."))
+;(define S48 ((run S47 copy) "folder1" "d:/"))
 
 

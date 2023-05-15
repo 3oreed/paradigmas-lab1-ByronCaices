@@ -43,6 +43,9 @@
 (define (get-folder-name folder)
   (car folder))
 
+(define (get-name folder)
+  (car folder))
+
 (define (get-create-date folder)
   (list-ref folder 1))
 
