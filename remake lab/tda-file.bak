@@ -1,33 +1,17 @@
 #lang racket
 
-(require racket/date)
 (provide (all-defined-out))
-
-(define (crnt-date-file)
-          (define fecha (current-date))
-                          (string-append
-                             (number->string (date-hour fecha))
-                             ":"
-                             (number->string (date-minute fecha))
-                             " - "
-                             (number->string (date-day fecha))
-                             "/"
-                             (number->string (date-month fecha))
-                             "/"
-                             (number->string (date-year fecha))))
-
 
 (define make-file (lambda (file-name ;0
                            extension
                            text
-                           ;security
+                           security
                            password
                            create-date
                            mod-date
                            location
                            creator
-                           size
-                           . security);9
+                           size);9
                         (list file-name ;0
                               extension
                               text
@@ -95,9 +79,4 @@
 
 (define (get-file-size file)
   (list-ref file 9))
-
-
-
-
-
 

@@ -2,6 +2,7 @@
 (require "tda-drive.rkt")
 (require "tda-user.rkt")
 (require "tda-folder.rkt")
+(require "tda-file.rkt")
 (require racket/date)
 (provide (all-defined-out))
 
@@ -198,8 +199,8 @@
                                  #f))))
 
 ; dado el current-path de system y un folder-name,
-; se toma el current-drive y se le agrega a su contenido el
-; si y solo si nuevo folder si este no existe
+; se toma el current-drive y se le agrega a su contenido
+; si y solo si nuevo folder no existe
 ; retorna un drive
 (define add-folder-to-drive (lambda (folder-name system-arg)
                               (let ([current-drive (get-current-drive system-arg)])
@@ -227,6 +228,191 @@
                                 (get-trashcan  system-arg)
                                 (cons (string-append (get-current-path system-arg) folder-name "/")
                                       (get-paths system-arg)))))))
+
+
+(define cd-type (lambda (arg)
+                  (cond
+                    [(equal? arg "/") "root"]
+                    [(equal? arg "..") "back"]
+                    [(equal? (substring arg 1 3) ":/") "path"]
+                    [else "folder"])))
+
+(define change-path (lambda (arg system-arg)
+                      (let ([current-path (get-current-path system-arg)])
+                        (cond
+                          [(equal? (cd-type arg) "root")
+                           (substring current-path 0 3)]
+                          [(equal? (cd-type arg) "back")
+                           (string-append (string-join(reverse(cdr(reverse(string-split current-path "/"))))"/") "/")]
+                          [(equal? (cd-type arg) "path")
+                           arg]
+                          [(existing-folder? arg system-arg)
+                           (string-append current-path arg "/")]
+                          [else
+                           current-path]))))
+
+(define cd (lambda (system-arg)
+             (lambda (arg)
+
+                 (if (and(existing-letter? (string-ref arg 0) (get-drives system-arg))
+                         (equal? (cd-type (get-current-path system-arg)) "path"))
+                     ;si es un type path entonces debo hacer un switch drive
+                     (make-system (get-system-name  system-arg) 
+                                  (get-loged-user system-arg)
+                                  (change-path arg system-arg)
+                                  (get-users  system-arg)
+                                  (get-system-date  system-arg)
+                                  ;switch-drive
+                                  (move-to-head (string-ref arg 0) (get-drives system-arg))
+                                  (get-trashcan  system-arg)
+                                  (get-paths system-arg))
+
+                     (make-system (get-system-name  system-arg) 
+                                  (get-loged-user system-arg)
+                                  (change-path arg system-arg)
+                                  (get-users  system-arg)
+                                  (get-system-date  system-arg) 
+                                  (get-drives system-arg)
+                                  (get-trashcan  system-arg)
+                                  (get-paths system-arg))))))
+
+;retorna la drives-list actualizada
+(define format-drive (lambda (letter new-name drives-list cola)
+                       (cond
+                         [(null? drives-list) cola]
+                         [(equal? letter (get-letter(car drives-list)))
+                          (format-drive letter new-name (cdr drives-list)
+                                        (cons
+                                         (make-drive letter
+                                                     new-name
+                                                     (get-drive-cap (car drives-list))
+                                                     '())
+                                         cola))]
+                         [else
+                          (format-drive letter new-name (cdr drives-list)
+                                        (cons (car drives-list)
+                                              cola))])))
+;funcion que elimina todos los paths asociados a la letra dada menos la raiz
+;retorna paths sin la letra
+(define format-paths (lambda (letter paths cola)
+                       (cond
+                         [(null? paths) (reverse cola)]
+                         [(and (> (string-length (car paths)) 3)
+                               (equal? letter (string-ref (car paths) 0)))
+                          (format-paths letter (cdr paths) cola)]
+                         [else
+                          (format-paths letter (cdr paths)
+                                        (cons (car paths)
+                                              cola))])))
+
+(define format (lambda (system-arg)
+                 (lambda (letter new-name)
+                   ((switch-drive (make-system (get-system-name  system-arg) 
+                                              (get-loged-user system-arg)
+                                              (get-current-path system-arg)
+                                              (get-users  system-arg)
+                                              (get-system-date  system-arg) 
+                                              (format-drive letter
+                                                            new-name
+                                                            (get-drives system-arg)
+                                                            '())
+                                              (get-trashcan  system-arg)
+                                              ;(get-paths system-arg)
+                                              (format-paths letter
+                                                            (get-paths system-arg)
+                                                            '())))
+                    ;letra del current path
+                    (string-ref (get-current-path system-arg) 0)   ))))
+
+
+
+(define sys-make-file (lambda (system-arg file-name extension text . security)
+                        (make-file file-name ;0
+                                   extension
+                                   text
+                                   (get-loged-user system-arg)
+                                   ""
+                                   (get-system-date system-arg)
+                                   (get-system-date system-arg)
+                                   security
+                                   (get-current-path system-arg)
+                                   "File*");9
+                        ))
+
+
+(define existing-file? (lambda (file-name system-arg)
+                           (let ([new-path (string-append (get-current-path system-arg) file-name)])
+                             (if (member new-path (get-paths system-arg))
+                                 #t
+                                 #f))))
+
+; dado el current-path de system y un file-name,
+; se toma el current-drive y se le agrega a su contenido
+; si y solo si nuevo file no existe
+; retorna un drive
+(define add-file-to-drive (lambda (file-name extension text security system-arg)
+                              (let ([current-drive (get-current-drive system-arg)])
+                                (if (existing-file? file-name system-arg)
+                                    current-drive
+                                    (make-drive (get-letter current-drive)
+                                                (get-drive-name current-drive)
+                                                (get-drive-cap current-drive)
+                                                (cons (sys-make-file system-arg file-name extension text security)
+                                                      (get-drive-content current-drive)))))))
+
+
+(define add-file (lambda (system-arg)
+                   (lambda (file-arg)
+                     (let* ([file-name (get-file-name file-arg)]
+                            [extension (get-extension file-arg)]
+                            [text (get-text file-arg)]
+                            [security (get-file-security file-arg)])
+                     (if (existing-file? file-name system-arg)
+                         system-arg
+                         (make-system (get-system-name  system-arg) 
+                                      (get-loged-user system-arg)
+                                      (get-current-path system-arg)
+                                      (get-users  system-arg)
+                                      (get-system-date  system-arg) 
+                                      (cons (add-file-to-drive file-name extension text security system-arg)
+                                            (cdr(get-drives system-arg)));;
+                                      (get-trashcan  system-arg)
+                                      (cons (string-append (get-current-path system-arg) file-name)
+                                            (get-paths system-arg))))))))
+
+
+;En mi system añadir a la papelera o eliminar será:
+;mover la ruta desde paths a trashcan y agregar atributo hide
+;si el path termina en / es folder sino es file
+
+
+;retorna lista de paths actualizada
+(define del-file-from-paths (lambda (file-name system-arg)
+                              (let* ([file-path (string-append (get-current-path system-arg) file-name)]
+                                     [paths (get-paths system-arg)])
+                                (if (existing-file? file-name system-arg)
+                                    (remove file-path paths)
+                                    paths))))
+
+
+
+;retorna el drive-content actualizada
+(define del-file-from-drive (lambda (file-name drive-content cola)
+
+                                 
+; del me                                  
+
+(define del (lambda (system-arg)
+              (lambda (name)
+                (make-system (get-system-name  system-arg) 
+                             (get-loged-user system-arg)
+                             (get-current-path system-arg)
+                             (get-users  system-arg)
+                             (get-system-date system-arg) 
+                             ;(get-drives system-arg)
+                             (del-file-from-drive name (get-current-drive system-arg) '())
+                             (get-trashcan  system-arg)
+                             (del-file-from-paths name system-arg)))))
 
 (define STEST (make-system "newSystem"
                            "user2"
@@ -271,6 +457,55 @@
 (define S15 ((run S14 md) "folder2"))
 (define S16 ((run S15 md) "folder3"))
 
+;ingresa a carpeta folder2
+(define S17 ((run S16 cd) "folder2"))
+
+;crea subcarpeta folder21 dentro de folder2 (incluye caso S19 de carpeta con nombre duplicado)
+(define S18 ((run S17 md) "folder21"))
+(define S19 ((run S18 md) "folder21"))
+
+;ingresa a subcarpeta e intenta ingresar a subcarpeta inexistente S221
+(define S20 ((run S19 cd) "folder21"))
+(define S21 ((run S20 cd) "folder22"))
+
+;vuelve a carpeta anterior
+(define S22 ((run S21 cd) ".."))
+
+;vuelve a ingresar folder21
+(define S23 ((run S22 cd) "folder21"))
+
+;crea subcarpeta folder211 e ingresa
+(define S24 ((run S23 md) "folder211"))
+(define S25 ((run S24 cd) "folder211"))
+
+;vuelve a la raíz de la unidad c:/
+(define S26 ((run S24 cd) "/"))
+
+;se cambia de unidad
+(define S27 ((run S26 switch-drive) #\D))
+
+;crea carpeta e ingresa a carpeta
+(define S28 ((run S27 md) "folder5"))
+(define S29 ((run S28 cd) "folder5"))
+
+;se cambia de carpeta en base a la ruta especificada
+(define S30 ((run S29 cd) "C:/folder1/"))
+
+;formateando drive D:
+(define S31 ((run S30 format) #\D "newD"))
+
+;añadiendo archivos
+(define S32 ((run S31 add-file) (file "foo1.txt" "txt" "hello world 1")))
+(define S33 ((run S32 add-file) (file "foo2.txt" "txt" "hello world 2")))
+(define S34 ((run S33 add-file) (file "foo3.docx" "docx" "hello world 3")))
+(define S35 ((run S34 add-file) (file "goo4.docx" "docx" "hello world 4" #\r))) ;con atributos de seguridad oculto (h) y de solo lectura (r)
+
+;eliminando archivos
+;;(define S36 ((run S35 del) "*.txt"))
+;;(define S37 ((run S35 del) "f*.docx"))
+(define S38 ((run S35 del) "goo4.docx"))
+;;(define S39 ((run S35 cd) ".."))
+;;(define S40 ((run S35 del) "folder1"))
 
 
 

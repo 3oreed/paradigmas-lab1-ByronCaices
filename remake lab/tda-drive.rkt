@@ -29,4 +29,4 @@
                      (caddr drive-arg)))
 
 (define get-drive-content (lambda (drive-arg)
-                     (cadddr drive-arg)))
+                     (list-ref drive-arg 3)))
