@@ -565,17 +565,63 @@
                                     (get-current-path system-arg)
                                     (get-users  system-arg)
                                     (get-system-date  system-arg) 
-                                    (cons (add-items-to-drive (car new-drives)
-                                                              ;items
-                                                              (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
-                                                                          (format-path target-path)))
-                                          (cdr new-drives))
+                                    (move-to-head (string-ref start-path 0)(cons (add-items-to-drive (car new-drives)
+                                                                                                   ;items
+                                                                                                   (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
+                                                                                                               (format-path target-path)))
+                                                                               (cdr new-drives)))
                                     (get-trashcan  system-arg)
                                     (remove-duplicates(append (path-from-copy (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
                                                                       (format-path target-path)))
                                           (get-paths system-arg)))))))))
 
 
+(define del-items-from-drive (lambda (drive-arg path)
+                               (let* ([drive-content (get-drive-content drive-arg)])
+                                 (make-drive (get-letter drive-arg)
+                                             (get-drive-name drive-arg)
+                                             (get-drive-cap drive-arg)
+                                             (filter (lambda (x) (not(string-contains?
+                                                                  (get-folder-location x)
+                                                                  path)))
+                                                       drive-content)))))
+
+(define delete-moved-paths (lambda (paths-list path)
+                             (filter (lambda (x)
+                                       (not(string-contains? x path)))
+                                     paths-list)))
+                                                                  
+                                                                  
+                                                        
+
+
+(define move2 (lambda (system-arg)
+               (lambda (item-name target-path)
+                 (let* ([my-system ((copy system-arg)item-name target-path)]
+                        [aux-path (string-append (format-path target-path) (format-name item-name))]
+                        [start-path (string-append (get-current-path my-system) (format-name item-name))]
+                        [path-to-delete (string-append (get-current-path my-system)(format-name item-name))]
+                        [new-drives (move-to-head (string-ref aux-path 0) (get-drives my-system))])
+                   (if (existing-path? aux-path system-arg)
+                       "a"
+                       (make-system (get-system-name  my-system) 
+                                    (get-loged-user my-system)
+                                    (get-current-path my-system)
+                                    (get-users  my-system)
+                                    (get-system-date  my-system) 
+                                    (cons (del-items-from-drive (car new-drives)
+                                                                start-path)
+                                          (cdr new-drives))
+                                    (get-trashcan  system-arg)
+                                    (delete-moved-paths (get-paths my-system) start-path)))))))
+                   
+                        
+(define move (lambda (system-arg)
+               (lambda (item-name target-path)
+                 (let ([my-system ((copy system-arg)item-name target-path)])
+                   my-system))))
+
+                   
 #|
                       (make-folder (get-folder-name folder-arg)
                                    (get-create-date folder-arg)
@@ -715,10 +761,10 @@
 ;copiando carpetas y archivos
 (define S46 ((run S35 copy) "foo1.txt" "c:/folder3/"))
 (define S47 ((run S46 cd) ".."))
-(define S48 ((run S47 copy) "folder1" "d:/"))
+(define S48 ((run S47 copy) "folder3" "d:/"))
 
 ;moviendo carpetas y archivos
-;(define S49 ((run S48 move) "folder3" "d:/"))
+(define S49 ((run S48 copy) "folder3" "d:/"))
 ;(define S50 ((run S49 cd) "folder1"))
 ;(define S51 ((run S50 move) "foo3.docx" "d:/folder3/"))
 
