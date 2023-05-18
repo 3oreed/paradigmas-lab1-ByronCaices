@@ -3,24 +3,24 @@
 (provide (all-defined-out))
 
 (define make-file (lambda (file-name ;0
-                           extension
-                           text
-                           creator
-                           password
-                           create-date
-                           mod-date
-                           security
-                           location
-                           type);9
-                        (list file-name ;0
                               extension ;1
                               text ;2
-                              creator ;3
+                              location ;3
                               password ;4
                               create-date ;5
                               mod-date ;6
                               security ;7
-                              location ;8
+                              creator ;8
+                              type);9
+                        (list file-name ;0
+                              extension ;1
+                              text ;2
+                              location ;3
+                              password ;4
+                              create-date ;5
+                              mod-date ;6
+                              security ;7
+                              creator ;8
                               type))) ;9
 
 (define file (lambda (name ext text . security)
@@ -72,11 +72,13 @@
   (list-ref file-arg 6))
 
 (define (get-file-location file-arg)
-  (list-ref file-arg 8))
+  (list-ref file-arg 3))
 
 (define (get-file-creator file-arg)
-  (list-ref file-arg 3))
+  (list-ref file-arg 8))
 
 (define (get-file-type file-arg)
   (list-ref file-arg 9))
+
+
 

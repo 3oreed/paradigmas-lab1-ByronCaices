@@ -321,7 +321,6 @@
                                               (format-paths letter
                                                             (get-paths system-arg)
                                                             '())))))
-                    
 
 
 
@@ -435,9 +434,8 @@
                              (get-loged-user system-arg)
                              (get-current-path system-arg)
                              (get-users  system-arg)
-                             (get-system-date system-arg) 
-                             ;(get-drives system-arg)
-                             (get-drives system-arg); con cdr se elimina el current drive
+                             (get-system-date system-arg)
+                             (get-drives system-arg)
                              (cons (get-file-location (car(get-file-from-drive name
                                                                            (get-drive-content(get-current-drive system-arg))
                                                                            '())))
@@ -461,15 +459,24 @@
 
 (define rd (lambda (system-arg)
              (lambda (folder-name)
+               (let ([folders-asociados (get-folderpath folder-name system-arg)])
                (make-system (get-system-name  system-arg) 
                             (get-loged-user system-arg)
                             (get-current-path system-arg)
                             (get-users  system-arg)
                             (get-system-date  system-arg) 
                             (get-drives system-arg)
-                            (cons (get-folderpath folder-name system-arg)
-                                  (get-trashcan  system-arg))
-                            (del-folderpath folder-name system-arg)))))
+                            (if (> (length folders-asociados) 1)
+                                ;si tiene a alguien asociado:
+                                (get-trashcan  system-arg)
+                                (cons folders-asociados
+                                      (get-trashcan  system-arg)))
+                             
+                            (if (> (length folders-asociados) 1)
+                                ;si tiene a alguien asociado:
+                                (get-paths system-arg)
+                                (del-folderpath folder-name system-arg)
+                                ))))))
 
 (define STEST (make-system "newSystem"
                            "user2"
@@ -561,19 +568,14 @@
 ;;(define S36 ((run S35 del) "*.txt"))
 ;;(define S37 ((run S35 del) "f*.docx"))
 (define S38 ((run S35 del) "goo4.docx"))
-;;(define S39 ((run S35 cd) ".."))
-;;(define S40 ((run S35 del) "folder1"))
+(define S39 ((run S35 cd) ".."))
+(define S40 ((run S39 del) "folder1"))
 
 ;borrando una carpeta
-;(define S41 ((run S39 rd) "folder1"))  ;no debería borrarla, pues tiene archivos
-;(define S42 ((run S41 cd) "folder1"))
-;(define S43 ((run S42 del) "*.*"))
-;(define S44 ((run S43 cd) ".."))
-;(define S45 ((run S44 rd) "folder1"))
-
-;copiando carpetas y archivos
-;(define S46 ((run S35 copy) "foo1.txt" "Cc:/folder3/"))
-;(define S47 ((run S46 cd) ".."))
-;(define S48 ((run S47 copy) "folder1" "d:/"))
+(define S41 ((run S39 rd) "folder1"))  ;no debería borrarla, pues tiene archivos
+(define S42 ((run S41 cd) "folder1"))
+;;(define S43 ((run S42 del) "*.*"))
+(define S44 ((run S42 cd) "..")) ;((run S43 cd) ".."))
+(define S45 ((run S44 rd) "folder1"))
 
 

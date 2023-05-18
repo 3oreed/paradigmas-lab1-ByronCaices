@@ -328,12 +328,13 @@
                         (make-file file-name ;0
                                    extension
                                    text
-                                   (get-loged-user system-arg)
+                                   (string-append (get-current-path system-arg) file-name)
                                    ""
                                    (get-system-date system-arg)
                                    (get-system-date system-arg)
                                    security
-                                   (string-append (get-current-path system-arg) file-name)
+                                   (get-loged-user system-arg)
+                                   
                                    ;(get-current-path system-arg)
                                    "File*");9
                         ))
@@ -469,7 +470,7 @@
                             (if (> (length folders-asociados) 1)
                                 ;si tiene a alguien asociado:
                                 (get-trashcan  system-arg)
-                                (cons folders-asociados
+                                (cons (car folders-asociados)
                                       (get-trashcan  system-arg)))
                              
                             (if (> (length folders-asociados) 1)
@@ -477,6 +478,43 @@
                                 (get-paths system-arg)
                                 (del-folderpath folder-name system-arg)
                                 ))))))
+
+(define search-item-by-path (lambda (new-path drive-content)
+                         (filter
+                          (lambda (x) (string-contains? (get-folder-location x) new-path))
+                          drive-content)))
+
+
+                      
+                                   
+
+#|
+                      (make-folder (get-folder-name folder-arg)
+                                   (get-create-date folder-arg)
+                                   (crnt-date)
+                                   new-path
+                                   (get-folder-creator folder-arg)
+                                   (get-folder-size folder-arg)
+                                   (get-items folder-arg)
+                                   (get-folder-security folder-arg)
+                                   (get-folder-pass folder-arg)
+                                   (folder-type folder-arg))))
+                      
+                      (make-file (get-file-name file-arg)
+                                 (get-extension file-arg)
+                                 (get-text file-arg)
+                                 (get-file-creator file-arg)
+                                 (get-file-password file-arg)
+                                 (get-create-date-file file-arg)
+                                 (get-mod-date-file file-arg);
+                                 (get-file-security file-arg)
+                                 (get-file-location file-arg)
+                                 ()
+
+|# 
+                                 
+
+;(search-folder-by-path "C:/folder1/" (get-drive-content(get-current-drive S15)))
 
 (define STEST (make-system "newSystem"
                            "user2"
@@ -574,8 +612,20 @@
 ;borrando una carpeta
 (define S41 ((run S39 rd) "folder1"))  ;no debería borrarla, pues tiene archivos
 (define S42 ((run S41 cd) "folder1"))
+
 ;;(define S43 ((run S42 del) "*.*"))
-(define S44 ((run S42 cd) "..")) ;((run S43 cd) ".."))
+(define S43.0 ((run S42 del) "goo4.docx")) ;;
+(define S43.1 ((run S43.0 del) "foo3.docx")) ;;
+(define S43.2 ((run S43.1 del) "foo2.txt")) ;;
+(define S43.3 ((run S43.2 del) "foo1.txt")) ;;
+
+(define S44 ((run S43.3 cd) "..")) ;((run S43 cd) ".."))
 (define S45 ((run S44 rd) "folder1"))
+
+;copiando carpetas y archivos
+;(define S46 ((run S35 copy) "foo1.txt" "c:/folder3/"))
+;(define S47 ((run S46 cd) ".."))
+;(define S48 ((run S47 copy) "folder1" "d:/"))
+
 
 
