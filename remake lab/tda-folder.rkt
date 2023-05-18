@@ -38,6 +38,33 @@
                                      "" ;8
                                      "" )));9
 
+(define set-location (lambda (folder-arg location)
+                       (if (equal? (folder-type folder-arg) "Folder"*)
+                           (make-folder (get-folder-name folder-arg)
+                                        (get-create-date folder-arg)
+                                        (get-create-date folder-arg)
+                                        location
+                                        (get-folder-creator folder-arg)
+                                        (get-folder-size folder-arg)
+                                        (get-items folder-arg)
+                                        (get-folder-security folder-arg)
+                                        (get-folder-pass folder-arg)
+                                        (folder-type folder-arg))
+                           ;si es File*
+                           (make-folder (get-folder-name folder-arg)
+                                        (get-create-date folder-arg)
+                                        (get-create-date folder-arg)
+                                        (string-append location (get-folder-name folder-arg))
+                                        (get-folder-creator folder-arg)
+                                        (get-folder-size folder-arg)
+                                        (get-items folder-arg)
+                                        (get-folder-security folder-arg)
+                                        (get-folder-pass folder-arg)
+                                        (folder-type folder-arg)))))
+  
+  
+  
+
 ;SELECTORES
 
 (define (get-folder-name folder)

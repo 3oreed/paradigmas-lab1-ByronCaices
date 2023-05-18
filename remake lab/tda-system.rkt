@@ -346,6 +346,11 @@
                                  #t
                                  #f))))
 
+(define existing-path? (lambda (new-path system-arg)
+                         (if (member new-path (get-paths system-arg))
+                             #t
+                             #f)))
+
 ; dado el current-path de system y un file-name,
 ; se toma el current-drive y se le agrega a su contenido
 ; si y solo si nuevo file no existe
@@ -479,14 +484,97 @@
                                 (del-folderpath folder-name system-arg)
                                 ))))))
 
+;COPY
+
+;segun un path dado busca todos los items pertenecientes a ese path
 (define search-item-by-path (lambda (new-path drive-content)
                          (filter
                           (lambda (x) (string-contains? (get-folder-location x) new-path))
                           drive-content)))
 
+(define make-list2 (lambda (e n cola)
+                    (if (> n 0)
+                        (make-list2 e (- n 1)(cons e cola))
+                        cola)))
+(define make-list (lambda (e n)
+                    (make-list2 e n '())))
 
+(define str-len (lambda (str)
+                  (length(string->list str))))
+
+;copia todos los items de una folder y les cambia su location
+;por la target location
+(define copy-items (lambda (items-list new-path)
+                     (map (lambda (item location)
+                            (if (equal? (folder-type item) "Folder*")
+                                (make-folder (get-folder-name item)
+                                             (get-create-date item)
+                                             (get-create-date item)
+                                             location
+                                             (get-folder-creator item)
+                                             (get-folder-size item)
+                                             (get-items item)
+                                             (get-folder-security item)
+                                             (get-folder-pass item)
+                                             (folder-type item))
+                                ;si es File*
+                                (make-folder (get-folder-name item)
+                                             (get-create-date item)
+                                             (get-create-date item)
+                                             (string-append location (get-folder-name item))
+                                             (get-folder-creator item)
+                                             (get-folder-size item)
+                                             (get-items item)
+                                             (get-folder-security item)
+                                             (get-folder-pass item)
+                                             (folder-type item))))
+                          items-list
+                          (make-list new-path (length items-list)))))
+
+;adquiere los nuevos paths que serán agregados al system tras copiar algo
+(define path-from-copy (lambda (items-list)
+                         (map get-folder-location items-list)))
+
+(define add-items-to-drive (lambda (drive-arg items)
+                             (make-drive (get-letter drive-arg)
+                                         (get-drive-name drive-arg)
+                                         (get-drive-cap drive-arg)
+                                         (append items
+                                                 (get-drive-content drive-arg)))))
                       
-                                   
+(define format-path (lambda (path)
+                      (string-append
+                       (string-upcase (substring path 0 3))
+                       (substring path 3))))
+
+(define format-name (lambda (name)
+                      (if (string-contains? name ".")
+                          name
+                          (string-append name "/"))))
+
+(define copy (lambda (system-arg)
+               (lambda (item-name target-path)
+                 (let* ([aux-path (string-append (format-path target-path) (format-name item-name))]
+                        [start-path (string-append (get-current-path system-arg) (format-name item-name))]
+                        [new-drives (move-to-head (string-ref aux-path 0) (get-drives system-arg))]
+                        [target-drive-content (get-drive-content(car(move-to-head (string-ref aux-path 0) (get-drives system-arg))))])
+                   (if (existing-path? aux-path system-arg)
+                       system-arg
+                       (make-system (get-system-name  system-arg) 
+                                    (get-loged-user system-arg)
+                                    (get-current-path system-arg)
+                                    (get-users  system-arg)
+                                    (get-system-date  system-arg) 
+                                    (cons (add-items-to-drive (car new-drives)
+                                                              ;items
+                                                              (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
+                                                                          (format-path target-path)))
+                                          (cdr new-drives))
+                                    (get-trashcan  system-arg)
+                                    (remove-duplicates(append (path-from-copy (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
+                                                                      (format-path target-path)))
+                                          (get-paths system-arg)))))))))
+
 
 #|
                       (make-folder (get-folder-name folder-arg)
@@ -622,10 +710,15 @@
 (define S44 ((run S43.3 cd) "..")) ;((run S43 cd) ".."))
 (define S45 ((run S44 rd) "folder1"))
 
+(define ITEMS (search-item-by-path "C:/folder1/" (get-drive-content(get-current-drive S35))))
+
 ;copiando carpetas y archivos
-;(define S46 ((run S35 copy) "foo1.txt" "c:/folder3/"))
-;(define S47 ((run S46 cd) ".."))
-;(define S48 ((run S47 copy) "folder1" "d:/"))
+(define S46 ((run S35 copy) "foo1.txt" "c:/folder3/"))
+(define S47 ((run S46 cd) ".."))
+(define S48 ((run S47 copy) "folder1" "d:/"))
 
-
+;moviendo carpetas y archivos
+;(define S49 ((run S48 move) "folder3" "d:/"))
+;(define S50 ((run S49 cd) "folder1"))
+;(define S51 ((run S50 move) "foo3.docx" "d:/folder3/"))
 
