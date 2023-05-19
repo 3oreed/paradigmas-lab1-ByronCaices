@@ -486,6 +486,17 @@
 
 ;COPY
 
+                      
+(define format-path (lambda (path)
+                      (string-append
+                       (string-upcase (substring path 0 3))
+                       (substring path 3))))
+
+(define format-name (lambda (name)
+                      (if (string-contains? name ".")
+                          name
+                          (string-append name "/"))))
+
 ;segun un path dado busca todos los items pertenecientes a ese path
 (define search-item-by-path (lambda (new-path drive-content)
                          (filter
@@ -510,7 +521,8 @@
                                 (make-folder (get-folder-name item)
                                              (get-create-date item)
                                              (get-create-date item)
-                                             location
+                                             (string-append location (format-name(get-folder-name item)))
+                                             ;(string-append (substring location 0 3) (substring (get-folder-location item)3))
                                              (get-folder-creator item)
                                              (get-folder-size item)
                                              (get-items item)
@@ -521,7 +533,10 @@
                                 (make-folder (get-folder-name item)
                                              (get-create-date item)
                                              (get-create-date item)
-                                             (string-append location (get-folder-name item))
+                                             ;(string-append location (get-folder-name item))
+                                             (if (> (length items-list)1)
+                                                 (string-append location (cadr(reverse(string-split (get-folder-location item) "/"))) "/" (get-folder-name item));"**a"
+                                                 (string-append location (format-name(get-folder-name item))))
                                              (get-folder-creator item)
                                              (get-folder-size item)
                                              (get-items item)
@@ -541,16 +556,7 @@
                                          (get-drive-cap drive-arg)
                                          (append items
                                                  (get-drive-content drive-arg)))))
-                      
-(define format-path (lambda (path)
-                      (string-append
-                       (string-upcase (substring path 0 3))
-                       (substring path 3))))
 
-(define format-name (lambda (name)
-                      (if (string-contains? name ".")
-                          name
-                          (string-append name "/"))))
 
 (define copy (lambda (system-arg)
                (lambda (item-name target-path)
@@ -572,8 +578,8 @@
                                                                                (cdr new-drives)))
                                     (get-trashcan  system-arg)
                                     (remove-duplicates(append (path-from-copy (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
-                                                                      (format-path target-path)))
-                                          (get-paths system-arg)))))))))
+                                                                                          (format-path target-path)))
+                                                              (get-paths system-arg)))))))))
 
 
 (define del-items-from-drive (lambda (drive-arg path)
@@ -595,31 +601,32 @@
                                                         
 
 
-(define move2 (lambda (system-arg)
-               (lambda (item-name target-path)
-                 (let* ([my-system ((copy system-arg)item-name target-path)]
-                        [aux-path (string-append (format-path target-path) (format-name item-name))]
-                        [start-path (string-append (get-current-path my-system) (format-name item-name))]
-                        [path-to-delete (string-append (get-current-path my-system)(format-name item-name))]
-                        [new-drives (move-to-head (string-ref aux-path 0) (get-drives my-system))])
-                   (if (existing-path? aux-path system-arg)
-                       "a"
-                       (make-system (get-system-name  my-system) 
-                                    (get-loged-user my-system)
-                                    (get-current-path my-system)
-                                    (get-users  my-system)
-                                    (get-system-date  my-system) 
-                                    (cons (del-items-from-drive (car new-drives)
-                                                                start-path)
-                                          (cdr new-drives))
-                                    (get-trashcan  system-arg)
-                                    (delete-moved-paths (get-paths my-system) start-path)))))))
-                   
-                        
+
+
+(define path-from-move (lambda (origin-path target-path system-arg)
+                         (path-from-copy (copy-items (search-item-by-path origin-path (get-drive-content(get-current-drive system-arg)))
+                                                     (format-path target-path)))))                     
+;item-name: folder3
+;current-path: C:/
+;origin-path: C:/folder3/
+;target-path: D:/
+;new-path: D:/folder3/
 (define move (lambda (system-arg)
                (lambda (item-name target-path)
-                 (let ([my-system ((copy system-arg)item-name target-path)])
-                   my-system))))
+                 (let* ([new-sys ((copy system-arg)item-name target-path)]
+                        [origin-path (string-append (get-current-path system-arg) (format-name item-name))]
+                        [new-path (string-append (format-path target-path) (format-name item-name))])
+                   ;new-sys
+                   (make-system (get-system-name  new-sys) 
+                                (get-loged-user new-sys)
+                                (get-current-path new-sys)
+                                (get-users  new-sys)
+                                (get-system-date  new-sys) 
+                                (cons (del-items-from-drive (get-current-drive new-sys)origin-path)
+                                      (cdr(get-drives new-sys)))
+                                (get-trashcan  new-sys)
+                                (delete-moved-paths (get-paths new-sys) origin-path))))))
+               
 
                    
 #|
@@ -761,10 +768,10 @@
 ;copiando carpetas y archivos
 (define S46 ((run S35 copy) "foo1.txt" "c:/folder3/"))
 (define S47 ((run S46 cd) ".."))
-(define S48 ((run S47 copy) "folder3" "d:/"))
+(define S48 ((run S47 copy) "folder1" "d:/"))
 
 ;moviendo carpetas y archivos
-(define S49 ((run S48 copy) "folder3" "d:/"))
-;(define S50 ((run S49 cd) "folder1"))
-;(define S51 ((run S50 move) "foo3.docx" "d:/folder3/"))
+(define S49 ((run S48 move) "folder3" "d:/"))
+(define S50 ((run S49 cd) "folder1"))
+(define S51 ((run S50 move) "foo3.docx" "d:/folder3/"))
 
