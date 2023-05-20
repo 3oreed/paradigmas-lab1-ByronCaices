@@ -1,7 +1,26 @@
 #lang racket
 (provide (all-defined-out))
 
-;CONSTRUCTOR
+;-----------------------------[ START OF: TDA drive ]-----------------------------
+
+; REPRESENTACION: letter (char) X name (string) X cap (int) X content (list)
+
+#| .............[ -> CONSTRUCTOR ].............
+
+FUNCION CONSTRUCTORA DE LA UNIDAD DE DISCO
+
+DESC: Función constructora del tda drive. Contiene la letra asignada a la unidad,
+ el nombre de la unidad, la capacidad de la unidad y su contenido.
+
+DOMINIO:
+- letter (char)
+- name (string)
+- cap (int)
+- content (list:folder/file)
+
+RECORRIDO: drive (list)
+
+|#
 
 (define make-drive (lambda (letter ;0
                              name

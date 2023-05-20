@@ -2,6 +2,36 @@
 
 (provide (all-defined-out))
 
+;-----------------------------[ START OF: TDA file ]-----------------------------
+
+; REPRESENTACION: file-name (string) X extension (string) X text (string) X
+; location (string) X password (string) X create-date (string) X mod-date (string) X
+; security (list) X creator (string) X type (string)
+
+#| .............[ -> CONSTRUCTOR ].............
+
+FUNCION CONSTRUCTORA DEL ARCHIVO
+
+DESC: Función constructora del tda file. Contiene el nombre del archivo, la extensión,
+ el texto contenido en el archivo, la ubicación, la contraseña, la fecha de creación,
+ la fecha de modificación, la seguridad, el creador y el tipo de archivo.
+
+DOMINIO:
+- file-name (string)
+- extension (string)
+- text (string)
+- location (string)
+- password (string)
+- create-date (date)
+- mod-date (date)
+- security (list:char) ;Puede ser un booleano o una cadena de texto dependiendo de cómo se maneje la seguridad
+- creator (user)
+- type (string)
+
+RECORRIDO: file (list)
+
+|#
+
 (define make-file (lambda (file-name ;0
                               extension ;1
                               text ;2

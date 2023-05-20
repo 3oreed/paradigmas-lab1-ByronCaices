@@ -6,6 +6,7 @@
 (require racket/date)
 (provide (all-defined-out))
 
+;funcion que obtiene la fecha actual y retorna un string con la hora y fecha
 (define (crnt-date)
           (define fecha (current-date))
                           (string-append
@@ -18,6 +19,34 @@
                              (number->string (date-month fecha))
                              "/"
                              (number->string (date-year fecha))))
+
+
+;-----------------------------[ START OF: TDA system ]-----------------------------
+
+; REPRESENTACION: system-name (string) X loged-user (string) X current-path (string) X
+; users (list) X system-date (string) X drives (list) X trashcan (list) X paths (list)
+
+#| .............[ -> CONSTRUCTOR ].............
+
+FUNCION CONSTRUCTORA DEL SISTEMA
+
+DESC: Función constructora del tda sistema. Contiene el nombre del sistema,
+ el usuario conectado, el camino actual, la lista de usuarios, la fecha del sistema,
+ los discos, la papelera y los caminos.
+
+DOMINIO:
+- system-name (string)
+- loged-user (string)
+- current-path (string)
+- users (list:user)
+- system-date (date)
+- drives (list:drive) 
+- trashcan (list:path) 
+- paths (list:path) 
+
+RECORRIDO: system (list)
+
+|#
 
 (define make-system (lambda
                         (system-name ;0
@@ -48,25 +77,159 @@
                               null) ;paths
                  ))
 
+;_____________________________________
 
+
+;                ...........................................
+
+
+
+
+#|               .............[ -> SELECTORES ].............               |#
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE NOMBRE DE SISTEMA
+
+DESC: Función que obtiene el nombre del sistema
+
+DOMINIO: system
+
+RECORRIDO: system-name(string)
+
+|#
 (define (get-system-name system) (list-ref system 0))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE USUARIO CONECTADO
+
+DESC: Función que obtiene el usuario conectado
+
+DOMINIO: system
+
+RECORRIDO: loged-user(string)
+
+|#
 (define (get-loged-user system) (list-ref system 1))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE RUTA ACTUAL
+
+DESC: Función que obtiene la ruta actual del sistema
+
+DOMINIO: system
+
+RECORRIDO: current-path(string)
+
+|#
 (define (get-current-path system) (list-ref system 2))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE USUARIOS
+
+DESC: Función que obtiene la lista de usuarios
+
+DOMINIO: system
+
+RECORRIDO: users(list)
+
+|#
 (define (get-users system) (list-ref system 3))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE FECHA DE SISTEMA
+
+DESC: Función que obtiene la fecha del sistema
+
+DOMINIO: system
+
+RECORRIDO: system-date(date)
+
+|#
 (define (get-system-date system) (list-ref system 4))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE UNIDADES DE DISCO
+
+DESC: Función que obtiene las unidades de disco del sistema
+
+DOMINIO: system
+
+RECORRIDO: drives(list)
+
+|#
 (define (get-drives system) (list-ref system 5))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE PAPELERA
+
+DESC: Función que obtiene la papelera del sistema
+
+DOMINIO: system
+
+RECORRIDO: trashcan(list)
+
+|#
 (define (get-trashcan system) (list-ref system 6))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE RUTAS
+
+DESC: Función que obtiene las rutas del sistema
+
+DOMINIO: system
+
+RECORRIDO: paths(list)
+
+|#
 (define (get-paths system) (list-ref system 7))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE UNIDAD DE DISCO ACTUAL
+
+DESC: Función que obtiene la unidad de disco actual del sistema
+
+DOMINIO: system
+
+RECORRIDO: current-drive(drive)
+
+|#
 (define (get-current-drive system) (car (get-drives system)))
+;_____________________________________
+
+;                .............................................
 
 
+;                 ---------------------------------------------
+;                |                                             |
+;                |      INICIO FUNCIONES ENUNCIADO LAB 1       |
+;                |                                             |
+;                 ---------------------------------------------
+
+
+
+#| FUNCION RUN
+
+DESC: Función que permite ejecutar un comando (función) sobre un sistema.
+
+DOMINIO: System X Command  
+
+RECORRIDO: System  
+ 
+|#
 (define run (lambda (system cmd) (cmd system)))
+;_____________________________________
 
-(define lista-n-elementos (lambda (e n cola)
-                            (if (> n 0)
-                                (lista-n-elementos e (- n 1) (cons e cola))
-                                cola)))
 
+;funcion que dada una letra verifica si existe un drive en drives de un system
 (define existing-letter? (lambda (letter drives)
                         (cond
                           [(null? drives) #f]
@@ -75,7 +238,18 @@
                            (existing-letter? letter (cdr drives))])))
 
 
-                            
+
+#| FUNCION ADD-DRIVE
+
+DESC: Función que permite añadir una unidad a un sistema. La letra de la unidad es única.
+
+DOMINIO: System X Letter (Char) X Name (String) X Cap (num)  
+
+RECORRIDO: System
+
+RECURSIVIDAD: Utiliza recursividad natural en existing-letter
+ 
+|#                          
 (define add-drive (lambda (system-arg)
                     (lambda (letter name cap)
                       (if (existing-letter? letter (get-drives system-arg))
@@ -90,6 +264,7 @@
                                        (get-trashcan  system-arg)
                                        (cons (string-append (string letter) ":/")
                                              (get-paths system-arg)))))))
+;_____________________________________
 
 ;funcion que verifica si un user existe o no
 (define existing-user? (lambda (user-name users)
@@ -99,6 +274,18 @@
                           [else
                            (existing-user? user-name (cdr users))])))
 
+#| FUNCION REGISTER
+
+DESC: Función que permite registrar un nuevo usuario al sistema.
+El nombre de usuario es único y no puede ser duplicado.
+
+DOMINIO: System X userName(string)  
+
+RECORRIDO: System
+
+RECURSIVIDAD: Utiliza recursividad natural en existing-user
+ 
+|#
 (define register (lambda (system-arg)
                     (lambda (user-name)
                       (if (existing-user? user-name (get-users system-arg))
@@ -112,12 +299,25 @@
                                        (get-drives  system-arg)
                                        (get-trashcan  system-arg)
                                        (get-paths system-arg))))))
+;_____________________________________
+
 
 ;Funcion que verifica si un string es vacio o nulo
 (define my-string-null? (lambda (str)
                           (equal? str "")))
 
+#| FUNCION LOGIN
 
+DESC: Función que permite iniciar sesión con un usuario del sistema,
+ solo si éste existe.
+
+DOMINIO: System X userName(string)  
+
+RECORRIDO: System
+
+RECURSIVIDAD: Utiliza recursividad natural en existing-user
+ 
+|#
 (define login (lambda (system-arg)
                     (lambda (user-name)
                       (if (and (existing-user? user-name (get-users system-arg))
@@ -132,7 +332,17 @@
                                        (get-trashcan  system-arg)
                                        (get-paths system-arg))
                           system-arg))))
+;_____________________________________
 
+#| FUNCION LOGOUT
+
+DESC: Función que permite cerrar la sesión de un usuario en el sistema.
+
+DOMINIO: System 
+
+RECORRIDO: System' 
+ 
+|#
 (define logout (lambda (system-arg)
                  (if (null? (get-loged-user system-arg))
                      system-arg
@@ -144,8 +354,10 @@
                                   (get-drives  system-arg)
                                   (get-trashcan  system-arg)
                                   (get-paths system-arg)))))
+;_____________________________________
 
 ;Funcion que mueve un elemento de una lista a su cabeza
+;en este caso dada una letra e de un drive lo mueve a la cabeza
 (define move-to-head (lambda (e lista)
                        (cons (first (filter
                                      (lambda (x) (char=? e (first x)))
@@ -156,10 +368,20 @@
                                      lista))))
 
 
+#| FUNCION SWITCH-DRIVE
 
+DESC: Funcion que fija la unidad en la que el usuario realizará acciones.
+      actualiza el current path del system
+
+DOMINIO: System X Letter (char)
+
+RECORRIDO: System
+ 
+|#
 (define switch-drive (lambda (system-arg)
                        (lambda (letter)
-                         (if (existing-letter? letter (get-drives system-arg))
+                         (if (and (not(my-string-null? (get-loged-user system-arg)))
+                                  (existing-letter? letter (get-drives system-arg)))
                              (make-system (get-system-name  system-arg) 
                                           (get-loged-user system-arg)
                                           (string-append (string letter) ":/")
@@ -169,8 +391,10 @@
                                           (get-trashcan  system-arg)
                                           (get-paths system-arg))
                              system-arg))))
+;_____________________________________
 
-; constructor de un folder dado un system
+; constructor de un folder dado un system entrega atributos como
+; usuario creador, hora de creacion, etc.
 (define sys-make-folder (lambda (folder-name system-arg)
                           (make-folder folder-name
                                        (get-system-date system-arg)
@@ -184,14 +408,8 @@
                                        "" ;pass
                                        "Folder*"))) ;type
                                        
-;funcion que dada una ruta de un system busca el drive que corresponde y lo retorna
-;"C:/"
-(define search-drive-by-path (lambda (system-arg)
-                               (let ([letter (string-ref(car(string-split (get-current-path system-arg) "/"))0)])
-                                 letter)))
 
 ;funcion que verifica si existe un folder-new en la ruta actual del system
-
 (define existing-folder? (lambda (folder-name system-arg)
                            (let ([new-path (string-append (get-current-path system-arg) folder-name "/")])
                              (if (member new-path (get-paths system-arg))
@@ -213,7 +431,18 @@
                                                       (get-drive-content current-drive)))))))
 
                                     
+#| FUNCION MD
 
+DESC:  función que permite crear directorio dentro de una unidad a
+ partir del nombre especificado. Internamente la función añade datos
+ relativos a usuario creador, fecha de creación, fecha de última
+ modificación, atributos de seguridad, etc.
+
+DOMINIO: System X FolderName (string)
+
+RECORRIDO: System
+ 
+|#
 (define md (lambda (system-arg)
              (lambda (folder-name)
                (if (existing-folder? folder-name system-arg)
@@ -229,7 +458,9 @@
                                 (cons (string-append (get-current-path system-arg) folder-name "/")
                                       (get-paths system-arg)))))))
 
+;_____________________________________
 
+;funcion que determina el tipo de operacion que se ejecutará al cambiar de ruta en system
 (define cd-type (lambda (arg)
                   (cond
                     [(equal? arg "/") "root"]
@@ -237,6 +468,7 @@
                     [(equal? (substring arg 1 3) ":/") "path"]
                     [else "folder"])))
 
+;funcion que actualiza el current path del sistema dado el tipo de cambio que se quiera realizar
 (define change-path (lambda (arg system-arg)
                       (let ([current-path (get-current-path system-arg)])
                         (cond
@@ -251,6 +483,17 @@
                           [else
                            current-path]))))
 
+#| FUNCION CD
+
+DESC:  función que permite cambiar la ruta (path) donde se realizarán operaciones.
+ cd permite cambiarse a un directorio especificado a partir de la ruta señalada en
+ un String.
+
+DOMINIO: System X Path or FolderName (string)
+
+RECORRIDO: System
+ 
+|#
 (define cd (lambda (system-arg)
              (lambda (arg)
 
@@ -275,55 +518,10 @@
                                   (get-drives system-arg)
                                   (get-trashcan  system-arg)
                                   (get-paths system-arg))))))
+;_____________________________________
 
-;retorna la drives-list actualizada
-(define format-drive (lambda (letter new-name drives-list cola)
-                       (cond
-                         [(null? drives-list) (reverse cola)]
-                         [(equal? letter (get-letter(car drives-list)))
-                          (format-drive letter new-name (cdr drives-list)
-                                        (cons
-                                         (make-drive letter
-                                                     new-name
-                                                     (get-drive-cap (car drives-list))
-                                                     '())
-                                         cola))]
-                         [else
-                          (format-drive letter new-name (cdr drives-list)
-                                        (cons (car drives-list)
-                                              cola))])))
-;funcion que elimina todos los paths asociados a la letra dada menos la raiz
-;retorna paths sin la letra
-(define format-paths (lambda (letter paths cola)
-                       (cond
-                         [(null? paths) (reverse cola)]
-                         [(and (> (string-length (car paths)) 3)
-                               (equal? letter (string-ref (car paths) 0)))
-                          (format-paths letter (cdr paths) cola)]
-                         [else
-                          (format-paths letter (cdr paths)
-                                        (cons (car paths)
-                                              cola))])))
-
-(define format (lambda (system-arg)
-                 (lambda (letter new-name)
-                   (make-system (get-system-name  system-arg) 
-                                              (get-loged-user system-arg)
-                                              (get-current-path system-arg)
-                                              (get-users  system-arg)
-                                              (get-system-date  system-arg) 
-                                              (format-drive letter
-                                                            new-name
-                                                            (get-drives system-arg)
-                                                            '())
-                                              (get-trashcan  system-arg)
-                                              ;(get-paths system-arg)
-                                              (format-paths letter
-                                                            (get-paths system-arg)
-                                                            '())))))
-
-
-
+; constructor de un file dado un system entrega atributos como
+; usuario creador, hora de creacion, etc.
 (define sys-make-file (lambda (system-arg file-name extension text . security)
                         (make-file file-name ;0
                                    extension
@@ -339,13 +537,14 @@
                                    "File*");9
                         ))
 
-
+;funcion que verifica si existe un file en una determinada ruta
 (define existing-file? (lambda (file-name system-arg)
                            (let ([new-path (string-append (get-current-path system-arg) file-name)])
                              (if (member new-path (get-paths system-arg))
                                  #t
                                  #f))))
 
+;funcion que verifica si existe un path en las rutas del sistema
 (define existing-path? (lambda (new-path system-arg)
                          (if (member new-path (get-paths system-arg))
                              #t
@@ -365,7 +564,15 @@
                                                 (cons (sys-make-file system-arg file-name extension text security)
                                                       (get-drive-content current-drive)))))))
 
+#| FUNCION ADD-FILE
 
+DESC:  función que permite añadir un archivo en la ruta actual.
+
+DOMINIO: System X FileName (string)
+
+RECORRIDO: System
+ 
+|#
 (define add-file (lambda (system-arg)
                    (lambda (file-arg)
                      (let* ([file-name (get-file-name file-arg)]
@@ -385,13 +592,14 @@
                                       (cons (string-append (get-current-path system-arg) file-name)
                                             (get-paths system-arg))))))))
 
+;_____________________________________
 
 ;En mi system añadir a la papelera o eliminar será:
-;mover la ruta desde paths a trashcan y agregar atributo hide
-;si el path termina en / es folder sino es file
+;mover la ruta desde paths a trashcan, de esta manera
+;el file queda inaccesible e inmutable
 
 
-;retorna lista de paths actualizada
+;dado el nombre de un file que se encuentra en ruta actual, elimina su ruta
 (define del-file-from-paths (lambda (file-name system-arg)
                               (let* ([file-path (string-append (get-current-path system-arg) file-name)]
                                      [paths (get-paths system-arg)])
@@ -399,26 +607,7 @@
                                     (remove file-path paths)
                                     paths))))
 
-
-
-;retorna el drive-content actualizada
-(define del-file-from-drive (lambda (file-name drive-content cola)
-                              (cond
-                                [(null? drive-content) (reverse cola)]
-                                [(equal? (get-name (car drive-content)) file-name)
-                                 (del-file-from-drive file-name (cdr drive-content) cola)]
-                                [else
-                                 (del-file-from-drive file-name
-                                                      (cdr drive-content)
-                                                      (cons (car drive-content)
-                                                            cola))])))
-
-(define update-drive-content (lambda (file-name drive-arg)
-                               (make-drive (get-letter drive-arg)
-                                           (get-drive-name drive-arg)
-                                           (get-drive-cap drive-arg)
-                                           (del-file-from-drive file-name (get-drive-content drive-arg) '()))))
-
+;dado el nombre de un file que se encuentra en ruta actual, busca el file y lo retorna
 (define get-file-from-drive (lambda (file-name drive-content cola)
                               (cond
                                 [(not(null? cola)) cola]
@@ -431,7 +620,17 @@
                                  (get-file-from-drive file-name (cdr drive-content) cola)])))
 
                                  
-                               
+#| FUNCION DEL
+
+DESC:  función que permite eliminar un archivo de la ruta actual.
+
+DOMINIO: System X FileName (string)
+
+RECORRIDO: System
+
+RECURSIVIDAD: Utiliza recursividad de cola
+
+|#                               
 ; Muevela ruta del archivo a la papelera, de esta manera el archivo
 ; sigue siendo almacenado en el drive pero se vuelve inaccesible e ineditable
 (define del (lambda (system-arg)
@@ -447,8 +646,9 @@
                                                                            '())))
                                    (get-trashcan  system-arg))
                              (del-file-from-paths name system-arg)))))
+;_____________________________________
 
-;rd
+;dado el nombre de un folder que se encuentra en ruta actual, elimina su ruta
 (define del-folderpath (lambda (folder-name system-arg)
                          (let* ([current-path (get-current-path system-arg)]
                                 [path-to-del (string-append current-path folder-name "/")])
@@ -456,6 +656,7 @@
                                      (not(string-contains? x path-to-del )))
                                    (get-paths system-arg)))))
 
+;dado el nombre de un folder que se encuentra en ruta actual, busca el folder y lo retorna
 (define get-folderpath (lambda (folder-name system-arg)
                          (let* ([current-path (get-current-path system-arg)]
                                 [path-to-del (string-append current-path folder-name "/")])
@@ -463,6 +664,15 @@
                                      (string-contains? x path-to-del ))
                                    (get-paths system-arg)))))
 
+#| FUNCION RD
+
+DESC:  función que permite eliminar un folder de la ruta actual, si está vacio
+
+DOMINIO: System X FolderName (string)
+
+RECORRIDO: System
+
+|#   
 (define rd (lambda (system-arg)
              (lambda (folder-name)
                (let ([folders-asociados (get-folderpath folder-name system-arg)])
@@ -483,15 +693,17 @@
                                 (get-paths system-arg)
                                 (del-folderpath folder-name system-arg)
                                 ))))))
+;_____________________________________
 
 ;COPY
 
-                      
+;funcion que formatea un path al formato utilizado por el system                     
 (define format-path (lambda (path)
                       (string-append
                        (string-upcase (substring path 0 3))
                        (substring path 3))))
 
+;funcion que formatea un foldername o filename al formato utilizado por el system 
 (define format-name (lambda (name)
                       (if (string-contains? name ".")
                           name
@@ -507,11 +719,14 @@
                     (if (> n 0)
                         (make-list2 e (- n 1)(cons e cola))
                         cola)))
+
+;funcion que crea un lista con n veces el elemento e
 (define make-list (lambda (e n)
                     (make-list2 e n '())))
 
 (define str-len (lambda (str)
                   (length(string->list str))))
+
 
 ;copia todos los items de una folder y les cambia su location
 ;por la target location
@@ -598,14 +813,7 @@
                                      paths-list)))
                                                                   
                                                                   
-                                                        
-
-
-
-
-(define path-from-move (lambda (origin-path target-path system-arg)
-                         (path-from-copy (copy-items (search-item-by-path origin-path (get-drive-content(get-current-drive system-arg)))
-                                                     (format-path target-path)))))                     
+                 
 ;item-name: folder3
 ;current-path: C:/
 ;origin-path: C:/folder3/
@@ -628,7 +836,52 @@
                                 (delete-moved-paths (get-paths new-sys) origin-path))))))
                
 
-                   
+
+;retorna la drives-list actualizada
+(define format-drive (lambda (letter new-name drives-list cola)
+                       (cond
+                         [(null? drives-list) (reverse cola)]
+                         [(equal? letter (get-letter(car drives-list)))
+                          (format-drive letter new-name (cdr drives-list)
+                                        (cons
+                                         (make-drive letter
+                                                     new-name
+                                                     (get-drive-cap (car drives-list))
+                                                     '())
+                                         cola))]
+                         [else
+                          (format-drive letter new-name (cdr drives-list)
+                                        (cons (car drives-list)
+                                              cola))])))
+;funcion que elimina todos los paths asociados a la letra dada menos la raiz
+;retorna paths sin la letra
+(define format-paths (lambda (letter paths cola)
+                       (cond
+                         [(null? paths) (reverse cola)]
+                         [(and (> (string-length (car paths)) 3)
+                               (equal? letter (string-ref (car paths) 0)))
+                          (format-paths letter (cdr paths) cola)]
+                         [else
+                          (format-paths letter (cdr paths)
+                                        (cons (car paths)
+                                              cola))])))
+
+(define format (lambda (system-arg)
+                 (lambda (letter new-name)
+                   (make-system (get-system-name  system-arg) 
+                                              (get-loged-user system-arg)
+                                              (get-current-path system-arg)
+                                              (get-users  system-arg)
+                                              (get-system-date  system-arg) 
+                                              (format-drive letter
+                                                            new-name
+                                                            (get-drives system-arg)
+                                                            '())
+                                              (get-trashcan  system-arg)
+                                              ;(get-paths system-arg)
+                                              (format-paths letter
+                                                            (get-paths system-arg)
+                                                            '())))))                  
 #|
                       (make-folder (get-folder-name folder-arg)
                                    (get-create-date folder-arg)
@@ -758,9 +1011,9 @@
 (define S43.0 ((run S42 del) "goo4.docx")) ;;
 (define S43.1 ((run S43.0 del) "foo3.docx")) ;;
 (define S43.2 ((run S43.1 del) "foo2.txt")) ;;
-(define S43.3 ((run S43.2 del) "foo1.txt")) ;;
+(define S43 ((run S43.2 del) "foo1.txt")) ;;
 
-(define S44 ((run S43.3 cd) "..")) ;((run S43 cd) ".."))
+(define S44 ((run S43 cd) "..")) ;((run S43 cd) ".."))
 (define S45 ((run S44 rd) "folder1"))
 
 (define ITEMS (search-item-by-path "C:/folder1/" (get-drive-content(get-current-drive S35))))
@@ -774,4 +1027,5 @@
 (define S49 ((run S48 move) "folder3" "d:/"))
 (define S50 ((run S49 cd) "folder1"))
 (define S51 ((run S50 move) "foo3.docx" "d:/folder3/"))
+
 

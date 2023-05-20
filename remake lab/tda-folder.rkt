@@ -2,6 +2,36 @@
 
 (provide (all-defined-out))
 
+;-----------------------------[ START OF: TDA folder ]-----------------------------
+
+; REPRESENTACION: folder-name (string) X create-date (string) X mod-date (string) X
+; location (string) X creator (list) X size (int) X cant-items (int) X
+; security (list) X password (string) X type (string)
+
+#| .............[ -> CONSTRUCTOR ].............
+
+FUNCION CONSTRUCTORA DE LA CARPETA
+
+DESC: Función constructora del tda folder. Contiene el nombre de la carpeta,
+la fecha de creación, la fecha de modificación, la ubicación, el creador, el
+tamaño, la cantidad de items, el nivel de seguridad, la contraseña y el tipo de carpeta.
+
+DOMINIO:
+- folder-name (string)
+- create-date (date)
+- mod-date (date)
+- location (string)
+- creator (user)
+- size (int)
+- cant-items (int)
+- security (list:char)
+- password (string)
+- type (string)
+
+RECORRIDO: folder (list)
+
+|#
+
 (define make-folder (lambda (folder-name ;0
                              create-date ;1
                              mod-date ;2
