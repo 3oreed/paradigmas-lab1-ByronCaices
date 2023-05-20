@@ -727,7 +727,7 @@ RECORRIDO: System
 (define str-len (lambda (str)
                   (length(string->list str))))
 
-
+ 
 ;copia todos los items de una folder y les cambia su location
 ;por la target location
 (define copy-items (lambda (items-list new-path)
@@ -772,7 +772,15 @@ RECORRIDO: System
                                          (append items
                                                  (get-drive-content drive-arg)))))
 
+#| FUNCION COPY
 
+DESC:  función que copia un folder/file a una ruta de destino
+
+DOMINIO: System X FolderName/FileName(string) X TargetPath
+
+RECORRIDO: System
+
+|# 
 (define copy (lambda (system-arg)
                (lambda (item-name target-path)
                  (let* ([aux-path (string-append (format-path target-path) (format-name item-name))]
@@ -795,8 +803,9 @@ RECORRIDO: System
                                     (remove-duplicates(append (path-from-copy (copy-items (search-item-by-path start-path (get-drive-content(get-current-drive system-arg)))
                                                                                           (format-path target-path)))
                                                               (get-paths system-arg)))))))))
+;_____________________________________
 
-
+;retorna un drive sin los items que fueron movidos a otra ruta
 (define del-items-from-drive (lambda (drive-arg path)
                                (let* ([drive-content (get-drive-content drive-arg)])
                                  (make-drive (get-letter drive-arg)
@@ -807,13 +816,22 @@ RECORRIDO: System
                                                                   path)))
                                                        drive-content)))))
 
+;elimina rutas de items movidos
 (define delete-moved-paths (lambda (paths-list path)
                              (filter (lambda (x)
                                        (not(string-contains? x path)))
                                      paths-list)))
                                                                   
                                                                   
-                 
+ #| FUNCION MOVE
+
+DESC:  función que copia un folder/file a una ruta de destino
+
+DOMINIO: System X FolderName/FileName(string) X TargetPath
+
+RECORRIDO: System
+
+|#                 
 ;item-name: folder3
 ;current-path: C:/
 ;origin-path: C:/folder3/
@@ -834,7 +852,7 @@ RECORRIDO: System
                                       (cdr(get-drives new-sys)))
                                 (get-trashcan  new-sys)
                                 (delete-moved-paths (get-paths new-sys) origin-path))))))
-               
+;_____________________________________               
 
 
 ;retorna la drives-list actualizada
@@ -865,7 +883,15 @@ RECORRIDO: System
                           (format-paths letter (cdr paths)
                                         (cons (car paths)
                                               cola))])))
+ #| FUNCION FORMAT
 
+DESC:  función que elimina todo el contenido de un drive y lo renombra
+
+DOMINIO: System X Letter(char) X Name(string)
+
+RECORRIDO: System
+
+|#
 (define format (lambda (system-arg)
                  (lambda (letter new-name)
                    (make-system (get-system-name  system-arg) 
@@ -882,45 +908,9 @@ RECORRIDO: System
                                               (format-paths letter
                                                             (get-paths system-arg)
                                                             '())))))                  
-#|
-                      (make-folder (get-folder-name folder-arg)
-                                   (get-create-date folder-arg)
-                                   (crnt-date)
-                                   new-path
-                                   (get-folder-creator folder-arg)
-                                   (get-folder-size folder-arg)
-                                   (get-items folder-arg)
-                                   (get-folder-security folder-arg)
-                                   (get-folder-pass folder-arg)
-                                   (folder-type folder-arg))))
-                      
-                      (make-file (get-file-name file-arg)
-                                 (get-extension file-arg)
-                                 (get-text file-arg)
-                                 (get-file-creator file-arg)
-                                 (get-file-password file-arg)
-                                 (get-create-date-file file-arg)
-                                 (get-mod-date-file file-arg);
-                                 (get-file-security file-arg)
-                                 (get-file-location file-arg)
-                                 ()
+              
 
-|# 
-                                 
-
-;(search-folder-by-path "C:/folder1/" (get-drive-content(get-current-drive S15)))
-
-(define STEST (make-system "newSystem"
-                           "user2"
-                           "C:/"
-                           '("user2" "user1")
-                           "16:24 - 11/5/2023"
-                           '('(#\C "SO" 1000 ()) '(#\D "Util" 2000 ()))
-                           '()
-                           '("D:/" "C:/" )))                                        
-                            
-
-; EJEMPLOS
+;------------------------------[ END OF: TDA System ]------------------------------
 
 (define S0 (system "newSystem"))
 

@@ -95,37 +95,147 @@ RECORRIDO: folder (list)
   
   
 
-;SELECTORES
+#| .............[ -> SELECTORES ]............. |#
 
-(define (get-folder-name folder)
-  (car folder))
+;_____________________________________
 
-(define (get-name folder)
-  (car folder))
+#| FUNCION SELECTORA DE NOMBRE DE CARPETA
 
-(define (get-create-date folder)
-  (list-ref folder 1))
+DESC: Función que obtiene el nombre de la carpeta
 
-(define (get-mod-date folder)
-  (list-ref folder 2))
+DOMINIO: folder
 
-(define (get-folder-location folder)
-  (list-ref folder 3))
+RECORRIDO: folder-name(string)
 
-(define (get-folder-creator folder)
-  (list-ref folder 4))
+|#
+(define (get-folder-name folder) (car folder))
 
-(define (get-folder-size folder)
-  (list-ref folder 5))
+;_____________________________________
 
-(define (get-items folder)
-  (list-ref folder 6))
+#| FUNCION SELECTORA DE NOMBRE
 
-(define (get-folder-security folder)
-  (list-ref folder 7))
+DESC: Función que obtiene el nombre de la carpeta
 
-(define (get-folder-pass folder)
-  (list-ref folder 8))
+DOMINIO: folder
 
-(define (folder-type folder)
-  (list-ref folder 9))
+RECORRIDO: name(string)
+
+|#
+(define (get-name folder) (car folder))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE FECHA DE CREACIÓN
+
+DESC: Función que obtiene la fecha de creación de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: create-date(date)
+
+|#
+(define (get-create-date folder) (list-ref folder 1))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE FECHA DE MODIFICACIÓN
+
+DESC: Función que obtiene la fecha de modificación de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: mod-date(date)
+
+|#
+(define (get-mod-date folder) (list-ref folder 2))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE UBICACIÓN DE CARPETA
+
+DESC: Función que obtiene la ubicación de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: folder-location(string)
+
+|#
+(define (get-folder-location folder) (list-ref folder 3))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CREADOR DE CARPETA
+
+DESC: Función que obtiene el creador de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: folder-creator(string)
+
+|#
+(define (get-folder-creator folder) (list-ref folder 4))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE TAMAÑO DE CARPETA
+
+DESC: Función que obtiene el tamaño de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: folder-size(int)
+
+|#
+(define (get-folder-size folder) (list-ref folder 5))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE ITEMS
+
+DESC: Función que obtiene los items de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: items(list)
+
+|#
+(define (get-items folder) (list-ref folder 6))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE SEGURIDAD DE CARPETA
+
+DESC: Función que obtiene la seguridad de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: folder-security(list)
+
+|#
+(define (get-folder-security folder) (list-ref folder 7))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CONTRASEÑA DE CARPETA
+
+DESC: Función que obtiene la contraseña de la carpeta
+
+DOMINIO: folder
+
+RECORRIDO: folder-pass(string)
+
+|#
+(define (get-folder-pass folder) (list-ref folder 8))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE TIPO DE ITEM
+
+DESC: Función que obtiene el tipo item
+
+DOMINIO: folder
+
+RECORRIDO: folder-type(string)
+
+|#
+(define (folder-type folder) (list-ref folder 9))

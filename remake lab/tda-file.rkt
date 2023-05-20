@@ -64,51 +64,136 @@ RECORRIDO: file (list)
                           security
                           ""
                           "")))
-;(define hide?)
-;(define read-only?)
 
-(define file1 (file "goo4.docx" "docx" "hello world 4" #\h #\r))
-(define file2 (file "goo4.docx" "docx" "hello world 4"))
+#| .............[ -> SELECTORES ]............. |#
 
-(define hide? (lambda (file-arg)
-                (if (not(member #\h (get-file-security file-arg)))
-                    #f
-                    #t)))
+;_____________________________________
 
-(define read-only? (lambda (file-arg)
-                (if (not(member #\r (get-file-security file-arg)))
-                    #f
-                    #t)))
+#| FUNCION SELECTORA DE NOMBRE DE ARCHIVO
 
-(define (get-file-name file-arg)
-  (list-ref file-arg 0))
+DESC: Función que obtiene el nombre del archivo
 
-(define (get-extension file-arg)
-  (list-ref file-arg 1))
+DOMINIO: file
 
-(define (get-text file-arg)
-  (list-ref file-arg 2))
+RECORRIDO: file-name(string)
 
-(define (get-file-security file-arg)
-  (list-ref file-arg 7))
+|#
+(define (get-file-name file-arg) (list-ref file-arg 0))
 
-(define (get-file-password file-arg)
-  (list-ref file-arg 4))
+;_____________________________________
 
-(define (get-create-date-file file-arg)
-  (list-ref file-arg 5))
+#| FUNCION SELECTORA DE EXTENSIÓN
 
-(define (get-mod-date-file file-arg)
-  (list-ref file-arg 6))
+DESC: Función que obtiene la extensión del archivo
 
-(define (get-file-location file-arg)
-  (list-ref file-arg 3))
+DOMINIO: file
 
-(define (get-file-creator file-arg)
-  (list-ref file-arg 8))
+RECORRIDO: extension(string)
 
-(define (get-file-type file-arg)
-  (list-ref file-arg 9))
+|#
+(define (get-extension file-arg) (list-ref file-arg 1))
 
+;_____________________________________
 
+#| FUNCION SELECTORA DE TEXTO
+
+DESC: Función que obtiene el contenido del archivo
+
+DOMINIO: file
+
+RECORRIDO: text(string)
+
+|#
+(define (get-text file-arg) (list-ref file-arg 2))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE SEGURIDAD DE ARCHIVO
+
+DESC: Función que obtiene la seguridad del archivo
+
+DOMINIO: file
+
+RECORRIDO: security(list)
+
+|#
+(define (get-file-security file-arg) (list-ref file-arg 7))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CONTRASEÑA DE ARCHIVO
+
+DESC: Función que obtiene la contraseña del archivo
+
+DOMINIO: file
+
+RECORRIDO: password(string)
+
+|#
+(define (get-file-password file-arg) (list-ref file-arg 4))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE FECHA DE CREACIÓN DE ARCHIVO
+
+DESC: Función que obtiene la fecha de creación del archivo
+
+DOMINIO: file
+
+RECORRIDO: create-date(date)
+
+|#
+(define (get-create-date-file file-arg) (list-ref file-arg 5))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE FECHA DE MODIFICACIÓN DE ARCHIVO
+
+DESC: Función que obtiene la fecha de modificación del archivo
+
+DOMINIO: file
+
+RECORRIDO: mod-date(date)
+
+|#
+(define (get-mod-date-file file-arg) (list-ref file-arg 6))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE UBICACIÓN DE ARCHIVO
+
+DESC: Función que obtiene la ubicación del archivo
+
+DOMINIO: file
+
+RECORRIDO: location(string)
+
+|#
+(define (get-file-location file-arg) (list-ref file-arg 3))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CREADOR DE ARCHIVO
+
+DESC: Función que obtiene el creador del archivo
+
+DOMINIO: file
+
+RECORRIDO: creator(string)
+
+|#
+(define (get-file-creator file-arg) (list-ref file-arg 8))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE TIPO DE ARCHIVO
+
+DESC: Función que obtiene el tipo del archivo
+
+DOMINIO: file
+
+RECORRIDO: type(string)
+
+|#
+(define (get-file-type file-arg) (list-ref file-arg 9))
 

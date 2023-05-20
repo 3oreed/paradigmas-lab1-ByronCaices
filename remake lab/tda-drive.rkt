@@ -38,14 +38,56 @@ RECORRIDO: drive (list)
                                      cap
                                      null)))
 
-(define get-letter (lambda (drive-arg)
-                     (car drive-arg)))
+#| .............[ -> SELECTORES ]............. |#
 
-(define get-drive-name (lambda (drive-arg)
-                     (cadr drive-arg)))
+;_____________________________________
 
-(define get-drive-cap (lambda (drive-arg)
-                     (caddr drive-arg)))
+#| FUNCION SELECTORA DE LETRA DE UNIDAD
 
-(define get-drive-content (lambda (drive-arg)
-                     (list-ref drive-arg 3)))
+DESC: Función que obtiene la letra de la unidad de disco
+
+DOMINIO: drive
+
+RECORRIDO: letter(string)
+
+|#
+(define get-letter (lambda (drive-arg) (car drive-arg)))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE NOMBRE DE UNIDAD
+
+DESC: Función que obtiene el nombre de la unidad de disco
+
+DOMINIO: drive
+
+RECORRIDO: drive-name(string)
+
+|#
+(define get-drive-name (lambda (drive-arg) (cadr drive-arg)))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CAPACIDAD DE UNIDAD
+
+DESC: Función que obtiene la capacidad de la unidad de disco
+
+DOMINIO: drive
+
+RECORRIDO: drive-cap(int)
+
+|#
+(define get-drive-cap (lambda (drive-arg) (caddr drive-arg)))
+
+;_____________________________________
+
+#| FUNCION SELECTORA DE CONTENIDO DE UNIDAD
+
+DESC: Función que obtiene el contenido de la unidad de disco
+
+DOMINIO: drive
+
+RECORRIDO: drive-content(list)
+
+|#
+(define get-drive-content (lambda (drive-arg) (list-ref drive-arg 3)))
