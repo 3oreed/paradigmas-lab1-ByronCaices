@@ -1,0 +1,30 @@
+ALGUNAS OBSERVACIONES SOBRE EL FUNCIONAMIENTO DEL PROGRAMA:
+
+Sea (define S0 (system “newSystem”)) a S0 se le agregan unidades, directorios y archivos tal que resulta el sistema SN con los siguientes atributos:
+current-path: “C:/”
+system-paths: 
+‘(“C:/” 
+“C:/carpeta0” 
+“C:/carpeta0/carpeta1” 
+“C:/carpeta0/carpeta1/file1.txt” 
+… 
+“C:/carpeta0/carpeta1/fileN.txt” 
+“D:/”)
+Si yo ejecuto ((run SN copy) “carpeta1” “d:/”) entonces se evalúa el siguiente resultado para system-paths:
+‘(“C:/” 
+“C:/carpeta0” 
+“C:/carpeta0/carpeta1” 
+“C:/carpeta0/carpeta1/file1.txt” 
+… 
+“C:/carpeta0/carpeta1/fileN.txt” 
+“D:/”
+“D:/carpeta0” 
+“D:/carpeta1” 
+“D:/carpeta1/file1.txt”
+…
+“D:/carpeta1/fileN.txt”)
+Como vemos efectivamente el contenido se copia a la ruta de destino sin embargo, si carpeta-padre contiene carpetas-hijas entonces las hijas quedan en la ruta de destino. La razón de este error aún no es identificada, por lo que no ha sido arreglada. Lo correcto sería:
+(…
+“D:/carpeta0/carpeta1/file1.txt” 
+… 
+“D:/carpeta0/carpeta1/fileN.txt”)
