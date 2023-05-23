@@ -12,8 +12,8 @@
 11	add-file	1
 12	del	0.5
 13	rd	1
-14	copy	1
-15	move	1
+14	copy	0.75
+15	move	0.75
 16	ren	0
 17	dir	0
 18	format	1
